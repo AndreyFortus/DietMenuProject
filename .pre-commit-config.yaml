@@ -3,3 +3,4 @@ repos:
     rev: '7.1.0'
     hooks:
     -   id: flake8
+        files: ^backend/
