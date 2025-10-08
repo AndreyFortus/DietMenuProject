@@ -62,8 +62,5 @@ jobs:
           DB_PORT: 5432
         run: |
           cd backend
-          
-          ls -R
-          
           python manage.py migrate
           pytest
