@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+env/
+.venv/
+
+# Django / Environment
+.env
+.env.*
+*.log
+media/
+staticfiles/
+
+# Docker
+*.pid
+postgres_data/
+
+# Frontend (React)
+frontend/node_modules/
+frontend/build/
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
