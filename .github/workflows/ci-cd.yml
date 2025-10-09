@@ -42,8 +42,8 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Install dependencies
-        working-directory: ./backend
         run: |
+          cd backend
           pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-django flake8
@@ -52,7 +52,6 @@ jobs:
         run: flake8 backend/
 
       - name: Run tests
-        working-directory: ./backend
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           DEBUG: False
@@ -62,5 +61,6 @@ jobs:
           DB_HOST: localhost
           DB_PORT: 5432
         run: |
+          cd backend
           python manage.py migrate
           pytest
