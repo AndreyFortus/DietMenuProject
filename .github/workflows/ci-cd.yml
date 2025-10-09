@@ -1,4 +1,5 @@
 name: Django CI
+# Test GitHub Actions
 
 on:
   push:
