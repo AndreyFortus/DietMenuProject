@@ -6,7 +6,7 @@ env/
 .venv/
 
 # Django / Environment
-.env
+backend/.env
 .env.*
 *.log
 media/
