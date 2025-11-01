@@ -31,11 +31,11 @@ def create_initial_products(sender, **kwargs):
         {'name': 'Spinach', 'calories_per_100g': 23, 'category': 'vegetable'},
         {'name': 'Zucchini', 'calories_per_100g': 20, 'category': 'vegetable'},
         # Fresh fruits
-        {'name': 'Apple', 'calories_per_100g': 52, 'category': 'fruit'},
-        {'name': 'Banana', 'calories_per_100g': 89, 'category': 'fruit'},
-        {'name': 'Strawberries', 'calories_per_100g': 32, 'category': 'fruit'},
-        {'name': 'Blueberries', 'calories_per_100g': 57, 'category': 'fruit'},
-        {'name': 'Orange', 'calories_per_100g': 47, 'category': 'fruit'},
+        {'name': 'Apple', 'calories_per_100g': 52, 'category': 'fruit_fresh'},
+        {'name': 'Banana', 'calories_per_100g': 89, 'category': 'fruit_fresh'},
+        {'name': 'Strawberries', 'calories_per_100g': 32, 'category': 'fruit_fresh'},
+        {'name': 'Blueberries', 'calories_per_100g': 57, 'category': 'fruit_fresh'},
+        {'name': 'Orange', 'calories_per_100g': 47, 'category': 'fruit_fresh'},
         # Dried fruits
         {'name': 'Apricots', 'calories_per_100g': 277, 'category': 'fruit_dried'},
         {'name': 'Dates', 'calories_per_100g': 282, 'category': 'fruit_dried'},
