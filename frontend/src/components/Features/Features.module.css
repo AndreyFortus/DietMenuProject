@@ -1,0 +1,56 @@
+/* 1. СТИЛІ ДЛЯ ЗОВНІШНЬОЇ СЕКЦІЇ (з image_5fa5c7.png) */
+.featuresSection {
+  width: 100%;
+  padding-top: 100px;
+  padding-bottom: 100px;
+
+  /* Обмежуємо ширину і центруємо */
+  max-width: 1128px;
+  margin: 0 auto;
+  padding-left: 20px;
+  padding-right: 20px;
+
+  /* Layout з Figma */
+  display: flex;
+  flex-direction: column;
+  gap: 50px; /* 'Gap: 50px' (між .header та .cardList) */
+}
+
+/* 2. БЛОК З ЗАГОЛОВКОМ (з image_5fa620.png) */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Центрує по горизонталі */
+  gap: 24px; /* 'Gap: 24px' (між h2 та p) */
+  text-align: center;
+}
+
+/* 3. СТИЛІ ДЛЯ h2 (з image_5fa641.png) */
+.header h2 {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 36px;
+  color: #344256;
+  line-height: 26px;
+  margin: 0;
+}
+
+/* 4. СТИЛІ ДЛЯ p (з image_5fa8ef.png) */
+.header p {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 20px;
+  color: #64748b;
+
+  /* Обмежуємо ширину, як у Figma */
+  max-width: 947px;
+  margin: 0;
+}
+
+/* 5. СПИСОК КАРТОК */
+.cardList {
+  display: flex;
+  flex-direction: row;
+  gap: 24px; /* (Це стандартний 'gap', який часто використовується) */
+}
