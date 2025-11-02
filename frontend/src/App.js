@@ -6,6 +6,7 @@ import Mission from "./components/Mission/Mission";
 import Features from "./components/Features/Features";
 import WhySection from "./components/WhySection/WhySection";
 import ContactSection from "./components/ContactSection/ContactSection";
+import Footer from "./components/Footer/Footer";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Features />
         <WhySection />
         <ContactSection />
+        <Footer />
       </main>
     </div>
   );
