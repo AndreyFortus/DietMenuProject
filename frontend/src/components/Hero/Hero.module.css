@@ -1,0 +1,52 @@
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+  padding-top: 100px;
+  padding-bottom: 100px;
+
+  max-width: 1128px;
+  margin: 0 auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.content {
+  flex: 1;
+  text-align: left;
+}
+
+.imageContainer {
+  flex: 1;
+}
+
+.imageContainer img {
+  width: 100%;
+  height: auto;
+}
+
+.content h1 {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 66px;
+  letter-spacing: 0px;
+  color: #344256;
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.content p {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: 0px;
+  color: #344256;
+  margin-bottom: 32px;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 16px;
+}
