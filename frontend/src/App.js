@@ -5,6 +5,7 @@ import Hero from "./components/Hero/Hero";
 import Mission from "./components/Mission/Mission";
 import Features from "./components/Features/Features";
 import WhySection from "./components/WhySection/WhySection";
+import ContactSection from "./components/ContactSection/ContactSection";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Mission />
         <Features />
         <WhySection />
+        <ContactSection />
       </main>
     </div>
   );
