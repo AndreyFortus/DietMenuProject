@@ -1,0 +1,67 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+}
+
+.iconContainer {
+  width: 70px;
+  height: 70px;
+  border-radius: 12px;
+  background-color: #f2fbf4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card h3 {
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 24px;
+  color: #344256;
+  margin: 0;
+}
+
+.card p {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+  color: #64748b;
+  margin: 0;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-radius: 10px;
+  height: 36px;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 20px;
+  color: #4caf50;
+  text-decoration: none;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.link svg {
+  width: 16px;
+  height: 16px;
+}
+
+.link svg path {
+  fill: #4caf50;
+}
