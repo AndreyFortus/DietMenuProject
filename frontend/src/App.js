@@ -1,26 +1,24 @@
 import React from "react";
+import { Routes, Route } from "react-router-dom";
 import "./App.css";
-import Header from "./components/Header/Header";
-import Hero from "./components/Hero/Hero";
-import Mission from "./components/Mission/Mission";
-import Features from "./components/Features/Features";
-import WhySection from "./components/WhySection/WhySection";
-import ContactSection from "./components/ContactSection/ContactSection";
-import Footer from "./components/Footer/Footer";
+
+import MainLayout from "./components/MainLayout/MainLayout";
+
+import HomePage from "./pages/HomePage/HomePage";
+import CalculatorPage from "./pages/CalculatorPage/CalculatorPage";
+import DishesPage from "./pages/DishesPage/DishesPage";
 
 function App() {
   return (
     <div className="App">
-      <Header />
+      <Routes>
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<HomePage />} />
+        </Route>
 
-      <main>
-        <Hero />
-        <Mission />
-        <Features />
-        <WhySection />
-        <ContactSection />
-        <Footer />
-      </main>
+        <Route path="/calculator" element={<CalculatorPage />} />
+        <Route path="/dishes" element={<DishesPage />} />
+      </Routes>
     </div>
   );
 }

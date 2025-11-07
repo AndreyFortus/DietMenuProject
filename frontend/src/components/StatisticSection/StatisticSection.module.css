@@ -1,0 +1,81 @@
+.statisticSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  box-shadow: 0px 2px 4px 0px #0000000d;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.header h2 {
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  color: #344256;
+  margin: 0;
+}
+.header p {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #64748b;
+  margin: 0;
+}
+
+.list {
+  display: flex;
+  gap: 24px;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mainValue {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: #344256;
+}
+
+.subValue {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.macroList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+}
+
+.macroItem {
+  display: flex;
+  justify-content: space-between;
+}
+
+.macroItem span:first-child {
+  font-weight: 400;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.macroItem span:last-child {
+  color: #344256;
+  font-weight: 600;
+  font-size: 12px;
+}

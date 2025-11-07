@@ -35,3 +35,8 @@
   font-weight: 700;
   color: #344256;
 }
+
+.navLink {
+  text-decoration: none;
+  color: inherit;
+}
