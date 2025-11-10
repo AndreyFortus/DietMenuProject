@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // 1. Імпортуємо useState
+import React, { useState } from "react";
 import styles from "./CalculatorForm.module.css";
 import Button from "../Button/Button";
 import NutrientInput from "../NutrientInput/NutrientInput";
@@ -39,6 +39,28 @@ const MOCK_PRODUCTS = {
 
 function CalculatorForm() {
   const [isProductsOpen, setIsProductsOpen] = useState(true);
+
+  const [products, setProducts] = useState(MOCK_PRODUCTS);
+
+  const handleClearAll = () => {
+    const clearedProducts = {
+      column1: products.column1.map((p) => ({ ...p, checked: false })),
+      column2: products.column2.map((p) => ({ ...p, checked: false })),
+      column3: products.column3.map((p) => ({ ...p, checked: false })),
+    };
+    setProducts(clearedProducts);
+  };
+
+  const handleCheckboxChange = (columnName, productId) => {
+    setProducts((prevProducts) => ({
+      ...prevProducts,
+      [columnName]: prevProducts[columnName].map((product) =>
+        product.id === productId
+          ? { ...product, checked: !product.checked }
+          : product
+      ),
+    }));
+  };
 
   const contentClassName = isProductsOpen
     ? styles.productsContent
@@ -98,27 +120,45 @@ function CalculatorForm() {
               {/* Список продуктів */}
               <div className={styles.productList}>
                 <div className={styles.productColumn}>
-                  {MOCK_PRODUCTS.column1.map((product) => (
+                  {products.column1.map((product) => (
                     <label key={product.id} className={styles.checkboxLabel}>
-                      <input type="checkbox" defaultChecked={product.checked} />
+                      <input
+                        type="checkbox"
+                        checked={product.checked}
+                        onChange={() =>
+                          handleCheckboxChange("column1", product.id)
+                        }
+                      />
                       <span className={styles.customCheckbox}></span>
                       {product.name}
                     </label>
                   ))}
                 </div>
                 <div className={styles.productColumn}>
-                  {MOCK_PRODUCTS.column2.map((product) => (
+                  {products.column2.map((product) => (
                     <label key={product.id} className={styles.checkboxLabel}>
-                      <input type="checkbox" defaultChecked={product.checked} />
+                      <input
+                        type="checkbox"
+                        checked={product.checked}
+                        onChange={() =>
+                          handleCheckboxChange("column2", product.id)
+                        }
+                      />
                       <span className={styles.customCheckbox}></span>
                       {product.name}
                     </label>
                   ))}
                 </div>
                 <div className={styles.productColumn}>
-                  {MOCK_PRODUCTS.column3.map((product) => (
+                  {products.column3.map((product) => (
                     <label key={product.id} className={styles.checkboxLabel}>
-                      <input type="checkbox" defaultChecked={product.checked} />
+                      <input
+                        type="checkbox"
+                        checked={product.checked}
+                        onChange={() =>
+                          handleCheckboxChange("column3", product.id)
+                        }
+                      />
                       <span className={styles.customCheckbox}></span>
                       {product.name}
                     </label>
@@ -127,7 +167,7 @@ function CalculatorForm() {
               </div>
 
               {/* Кнопка "Скинути" */}
-              <button className={styles.clearButton}>
+              <button className={styles.clearButton} onClick={handleClearAll}>
                 Скинути всі обрані страви
               </button>
             </div>
