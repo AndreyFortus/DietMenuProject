@@ -7,6 +7,7 @@ import { ReactComponent as SearchIcon } from "../../assets/search-icon.svg";
 const MOCK_DATA = [
   {
     id: 1,
+    type: "dish",
     image: "/images/oatmeal.jpg",
     title: "Вівсянка з фруктами",
     description: "Вівсянка, Молоко...",
@@ -19,6 +20,7 @@ const MOCK_DATA = [
   },
   {
     id: 2,
+    type: "dish",
     image: "/images/carbonara.jpg",
     title: 'Паста "Карбонара"',
     description: "Спагеті, Бекон...",
@@ -31,6 +33,7 @@ const MOCK_DATA = [
   },
   {
     id: 3,
+    type: "product",
     image: "/images/cheese.jpg",
     title: "Сир коров'ячий",
     description: "Сир коров'ячий...",
@@ -43,6 +46,7 @@ const MOCK_DATA = [
   },
   {
     id: 4,
+    type: "drink",
     image: "/images/tea.jpg",
     title: "Чорний чай",
     description: "Чорний чай без цукру",
@@ -55,6 +59,7 @@ const MOCK_DATA = [
   },
   {
     id: 5,
+    type: "product",
     image: "/images/apple.jpg",
     title: "Яблуко зелене",
     description: "Просто яблуко :)",
@@ -74,9 +79,18 @@ function DishesPage() {
   const [activeFilter, setActiveFilter] = useState("all");
 
   useEffect(() => {
-    // Тут буде fetch
-    setDishes(MOCK_DATA);
-  }, []);
+    if (activeFilter === "all") {
+      setDishes(MOCK_DATA);
+    } else {
+      const filteredDishes = MOCK_DATA.filter(
+        (dish) => dish.type === activeFilter
+      );
+      setDishes(filteredDishes);
+    }
+    // fetch(`/api/dishes?filter=${activeFilter}`)
+    //   .then(res => res.json())
+    //   .then(data => setDishes(data));
+  }, [activeFilter]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -123,7 +137,7 @@ function DishesPage() {
                   ? styles.filterActive
                   : styles.filterButton
               }
-              onClick={() => setActiveFilter("products")}
+              onClick={() => setActiveFilter("product")}
             >
               Продукти
             </button>
@@ -133,7 +147,7 @@ function DishesPage() {
                   ? styles.filterActive
                   : styles.filterButton
               }
-              onClick={() => setActiveFilter("dishes")}
+              onClick={() => setActiveFilter("dish")}
             >
               Страви
             </button>
@@ -143,7 +157,7 @@ function DishesPage() {
                   ? styles.filterActive
                   : styles.filterButton
               }
-              onClick={() => setActiveFilter("drinks")}
+              onClick={() => setActiveFilter("drink")}
             >
               Напої
             </button>
