@@ -1,9 +1,10 @@
 import React from "react";
 import styles from "./FeatureCard.module.css";
+import { Link } from "react-router-dom";
 
 import { ReactComponent as LinkArrow } from "../../assets/link-arrow.svg";
 
-function FeatureCard({ IconComponent, title, description }) {
+function FeatureCard({ IconComponent, title, description, to }) {
   return (
     <div className={styles.card}>
       <div className={styles.iconContainer}>
@@ -13,13 +14,10 @@ function FeatureCard({ IconComponent, title, description }) {
       <h3>{title}</h3>
       <p>{description}</p>
 
-      <button
-        onClick={() => console.log("Button clicked!")}
-        className={styles.link}
-      >
+      <Link to={to} className={styles.link}>
         <span>Переглянути</span>
         <LinkArrow />
-      </button>
+      </Link>
     </div>
   );
 }

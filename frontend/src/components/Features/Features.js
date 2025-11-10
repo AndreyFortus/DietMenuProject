@@ -23,16 +23,19 @@ function Features() {
           IconComponent={DbIcon}
           title="База продуктів"
           description="Переглядайте список продуктів з повними даними про білки, жири, вуглеводи, калорійність і вартість."
+          to="/dishes"
         />
         <FeatureCard
           IconComponent={ListIcon}
           title="Каталог страв"
           description="Обирайте готові страви або створюйте власні комбінації продуктів для швидкого планування харчування."
+          to="/dishes"
         />
         <FeatureCard
           IconComponent={CalcIcon}
           title="Оптимізація раціону"
           description="Автоматично розраховуйте найвигідніший набір продуктів, щоб задовільнити калорійні потреби з мінімальною ціною."
+          to="/calculator"
         />
       </div>
     </section>

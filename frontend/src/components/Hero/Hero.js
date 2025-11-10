@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./Hero.module.css";
 import Button from "../Button/Button";
-
+import { Link } from "react-router-dom";
 import heroImage from "../../assets/hero-image.png";
 import { ReactComponent as ArrowIcon } from "../../assets/arrow-right.svg";
 import { ReactComponent as ChevronIcon } from "../../assets/chevron-right.svg";
@@ -18,9 +18,12 @@ function Hero() {
         </p>
 
         <div className={styles.buttonRow}>
-          <Button variant="primary" iconAfter={<ArrowIcon />}>
-            Сформувати раціон
-          </Button>
+          <Link to="/calculator" className={styles.buttonLink}>
+            <Button variant="primary" iconAfter={<ArrowIcon />}>
+              Сформувати раціон
+            </Button>
+          </Link>
+
           <Button variant="secondary" iconAfter={<ChevronIcon />}>
             Дивитися Демо
           </Button>
