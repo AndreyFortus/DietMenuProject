@@ -37,7 +37,7 @@ const MOCK_PRODUCTS = {
   ],
 };
 
-function CalculatorForm() {
+function CalculatorForm({ onGenerate }) {
   const [isProductsOpen, setIsProductsOpen] = useState(true);
   const [products, setProducts] = useState(MOCK_PRODUCTS);
 
@@ -91,20 +91,31 @@ function CalculatorForm() {
 
     console.log("🚀 Sending data to backend:", requestData);
 
-    /*
-    fetch('http://localhost:8000/api/calculate-ration/', {
-      method: 'POST',
+    // Test
+    const API_URL =
+      "https://a11181f3-741e-47c2-affd-e0db7eeb352c.mock.pstmn.io/api/calculate-ration";
+
+    fetch(API_URL, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(requestData),
     })
-    .then(response => response.json())
-    .then(data => console.log('Success:', data))
-    .catch((error) => console.error('Error:', error));
-    */
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Success from API:", data);
 
-    alert("Дані зібрано! Перевірте консоль");
+        if (onGenerate) {
+          onGenerate(data);
+        }
+      })
+      .catch((error) => console.error("Error:", error));
   };
 
   const contentClassName = isProductsOpen

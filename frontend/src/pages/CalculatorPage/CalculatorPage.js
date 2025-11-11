@@ -7,6 +7,15 @@ import StatisticSection from "../../components/StatisticSection/StatisticSection
 
 function CalculatorPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showResults, setShowResults] = useState(false);
+
+  const [apiData, setApiData] = useState(null);
+
+  const handleGenerate = (data) => {
+    console.log("Received data from form:", data);
+    setApiData(data);
+    setShowResults(true);
+  };
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -26,9 +35,13 @@ function CalculatorPage() {
           <p>Введіть ваші цілі по макронутрієнтам</p>
         </div>
 
-        <CalculatorForm />
-        <RationSection />
-        <StatisticSection />
+        <CalculatorForm onGenerate={handleGenerate} />
+        {showResults && (
+          <>
+            <RationSection meals={apiData.ration} />
+            <StatisticSection stats={apiData.statistics} />
+          </>
+        )}
       </main>
     </div>
   );
