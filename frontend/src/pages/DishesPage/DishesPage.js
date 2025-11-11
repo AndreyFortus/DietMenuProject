@@ -75,22 +75,26 @@ const MOCK_DATA = [
 function DishesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [dishes, setDishes] = useState([]);
-
   const [activeFilter, setActiveFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    if (activeFilter === "all") {
-      setDishes(MOCK_DATA);
-    } else {
-      const filteredDishes = MOCK_DATA.filter(
-        (dish) => dish.type === activeFilter
-      );
-      setDishes(filteredDishes);
+    let filtered = MOCK_DATA;
+
+    if (activeFilter !== "all") {
+      filtered = filtered.filter((dish) => dish.type === activeFilter);
     }
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((dish) =>
+        dish.title.toLowerCase().includes(query)
+      );
+    }
+    setDishes(filtered);
     // fetch(`/api/dishes?filter=${activeFilter}`)
     //   .then(res => res.json())
     //   .then(data => setDishes(data));
-  }, [activeFilter]);
+  }, [activeFilter, searchQuery]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -117,7 +121,12 @@ function DishesPage() {
           </div>
           <div className={styles.searchBar}>
             <SearchIcon />
-            <input type="text" placeholder="Шукайте страви або продукти" />
+            <input
+              type="text"
+              placeholder="Шукайте страви або продукти"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
 
           <div className={styles.filterList}>
@@ -133,7 +142,7 @@ function DishesPage() {
             </button>
             <button
               className={
-                activeFilter === "products"
+                activeFilter === "product"
                   ? styles.filterActive
                   : styles.filterButton
               }
@@ -143,7 +152,7 @@ function DishesPage() {
             </button>
             <button
               className={
-                activeFilter === "dishes"
+                activeFilter === "dish"
                   ? styles.filterActive
                   : styles.filterButton
               }
@@ -153,7 +162,7 @@ function DishesPage() {
             </button>
             <button
               className={
-                activeFilter === "drinks"
+                activeFilter === "drink"
                   ? styles.filterActive
                   : styles.filterButton
               }
