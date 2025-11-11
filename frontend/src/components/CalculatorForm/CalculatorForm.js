@@ -39,8 +39,13 @@ const MOCK_PRODUCTS = {
 
 function CalculatorForm() {
   const [isProductsOpen, setIsProductsOpen] = useState(true);
-
   const [products, setProducts] = useState(MOCK_PRODUCTS);
+
+  const [macros, setMacros] = useState({
+    protein: "",
+    fat: "",
+    carbs: "",
+  });
 
   const handleClearAll = () => {
     const clearedProducts = {
@@ -62,6 +67,46 @@ function CalculatorForm() {
     }));
   };
 
+  const handleMacroChange = (field, value) => {
+    setMacros((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = () => {
+    const selectedProducts = [
+      ...products.column1,
+      ...products.column2,
+      ...products.column3,
+    ]
+      .filter((p) => p.checked)
+      .map((p) => p.name);
+
+    const requestData = {
+      target_macros: {
+        protein: Number(macros.protein),
+        fat: Number(macros.fat),
+        carbs: Number(macros.carbs),
+      },
+      selected_products: selectedProducts,
+    };
+
+    console.log("🚀 Sending data to backend:", requestData);
+
+    /*
+    fetch('http://localhost:8000/api/calculate-ration/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+    })
+    .then(response => response.json())
+    .then(data => console.log('Success:', data))
+    .catch((error) => console.error('Error:', error));
+    */
+
+    alert("Дані зібрано! Перевірте консоль");
+  };
+
   const contentClassName = isProductsOpen
     ? styles.productsContent
     : `${styles.productsContent} ${styles.productsContentClosed}`;
@@ -76,9 +121,21 @@ function CalculatorForm() {
         </div>
 
         <div className={styles.inputList}>
-          <NutrientInput label="Білки (г)" value={324} />
-          <NutrientInput label="Жири (г)" value={234} />
-          <NutrientInput label="Вуглеводи (г)" value={234} />
+          <NutrientInput
+            label="Білки (г)"
+            value={macros.protein}
+            onChange={(val) => handleMacroChange("protein", val)}
+          />
+          <NutrientInput
+            label="Жири (г)"
+            value={macros.fat}
+            onChange={(val) => handleMacroChange("fat", val)}
+          />
+          <NutrientInput
+            label="Вуглеводи (г)"
+            value={macros.carbs}
+            onChange={(val) => handleMacroChange("carbs", val)}
+          />
         </div>
       </div>
 
@@ -176,9 +233,11 @@ function CalculatorForm() {
       </div>
 
       <div className={styles.buttonWrapper}>
-        <Button variant="primary" iconBefore={<SparkleIcon />}>
-          Згенерувати раціон
-        </Button>
+        <div onClick={handleSubmit}>
+          <Button variant="primary" iconBefore={<SparkleIcon />}>
+            Згенерувати раціон
+          </Button>
+        </div>
       </div>
     </div>
   );
