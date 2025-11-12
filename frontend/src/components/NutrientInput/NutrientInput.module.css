@@ -28,3 +28,21 @@
   -webkit-appearance: none;
   margin: 0;
 }
+
+.inputError {
+  border-color: #ff4d4f;
+  background-color: #fff1f0;
+}
+
+.inputError:focus {
+  outline: none;
+  border-color: #ff4d4f;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+}
+
+.errorMessage {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  color: #ff4d4f;
+  margin-top: 4px;
+}

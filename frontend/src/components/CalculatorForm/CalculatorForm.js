@@ -37,6 +37,12 @@ const MOCK_PRODUCTS = {
   ],
 };
 
+const MIN_VALUES = {
+  protein: 40,
+  fat: 35,
+  carbs: 50,
+};
+
 function CalculatorForm({ onGenerate }) {
   const [isProductsOpen, setIsProductsOpen] = useState(true);
   const [products, setProducts] = useState(MOCK_PRODUCTS);
@@ -46,6 +52,8 @@ function CalculatorForm({ onGenerate }) {
     fat: "",
     carbs: "",
   });
+
+  const [errors, setErrors] = useState({});
 
   const handleClearAll = () => {
     const clearedProducts = {
@@ -69,9 +77,34 @@ function CalculatorForm({ onGenerate }) {
 
   const handleMacroChange = (field, value) => {
     setMacros((prev) => ({ ...prev, [field]: value }));
+
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: null }));
+    }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!macros.protein || Number(macros.protein) < MIN_VALUES.protein) {
+      newErrors.protein = `Мін. ${MIN_VALUES.protein}г (безпечна норма)`;
+    }
+    if (!macros.fat || Number(macros.fat) < MIN_VALUES.fat) {
+      newErrors.fat = `Мін. ${MIN_VALUES.fat}г (безпечна норма)`;
+    }
+    if (!macros.carbs || Number(macros.carbs) < MIN_VALUES.carbs) {
+      newErrors.carbs = `Мін. ${MIN_VALUES.carbs}г (безпечна норма)`;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = () => {
+    if (!validate()) {
+      return;
+    }
+
     const selectedProducts = [
       ...products.column1,
       ...products.column2,
@@ -136,16 +169,19 @@ function CalculatorForm({ onGenerate }) {
             label="Білки (г)"
             value={macros.protein}
             onChange={(val) => handleMacroChange("protein", val)}
+            error={errors.protein}
           />
           <NutrientInput
             label="Жири (г)"
             value={macros.fat}
             onChange={(val) => handleMacroChange("fat", val)}
+            error={errors.fat}
           />
           <NutrientInput
             label="Вуглеводи (г)"
             value={macros.carbs}
             onChange={(val) => handleMacroChange("carbs", val)}
+            error={errors.carbs}
           />
         </div>
       </div>
