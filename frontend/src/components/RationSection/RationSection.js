@@ -6,47 +6,10 @@ import { ReactComponent as BreakfastIcon } from "../../assets/breakfast-icon.svg
 import { ReactComponent as LunchIcon } from "../../assets/lunch-icon.svg";
 import { ReactComponent as DinnerIcon } from "../../assets/dinner-icon.svg";
 
-const MOCK_DATA = [
-  {
-    id: 1,
-    image: "/images/oatmeal.jpg",
-    title: "Вівсянка з фруктами",
-    description: "Вівсянка, Молоко, Банани, Яблука",
-    price: "18.50",
-    portion: "(~ 125 ₴ порція)",
-    calories: "285",
-    protein: "32",
-    fat: "12",
-    carbs: "8",
-  },
-  {
-    id: 2,
-    image: "/images/carbonara.jpg",
-    title: 'Паста "Карбонара"',
-    description: "Спагеті, Бекон (панчетта), яєчні жовтки...",
-    price: "18.50",
-    portion: "(~ 125 ₴ порція)",
-    calories: "285",
-    protein: "32",
-    fat: "12",
-    carbs: "8",
-  },
-  {
-    id: 3,
-    image: "/images/cheese.jpg",
-    title: "Сир коров'ячий",
-    description: "Сир коров'ячий знежирений",
-    price: "18.50",
-    portion: "(~ 125 ₴ порція)",
-    calories: "285",
-    protein: "32",
-    fat: "12",
-    carbs: "8",
-  },
-];
-
-function RationSection() {
+function RationSection({ meals }) {
   const [activeTab, setActiveTab] = useState("breakfast");
+
+  if (!meals) return null;
 
   return (
     <div className={styles.rationSection}>
@@ -72,7 +35,7 @@ function RationSection() {
       </nav>
 
       <div className={styles.list}>
-        {MOCK_DATA.map((meal) => (
+        {meals.map((meal) => (
           <MealCard key={meal.id} data={meal} />
         ))}
       </div>
