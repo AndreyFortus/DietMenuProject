@@ -7,6 +7,7 @@ import MainLayout from "./components/MainLayout/MainLayout";
 import HomePage from "./pages/HomePage/HomePage";
 import CalculatorPage from "./pages/CalculatorPage/CalculatorPage";
 import DishesPage from "./pages/DishesPage/DishesPage";
+import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
 
         <Route path="/calculator" element={<CalculatorPage />} />
         <Route path="/dishes" element={<DishesPage />} />
+
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>
   );
