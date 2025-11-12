@@ -4,97 +4,52 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import MealCard from "../../components/MealCard/MealCard";
 import { ReactComponent as SearchIcon } from "../../assets/search-icon.svg";
 
-const MOCK_DATA = [
-  {
-    id: 1,
-    type: "dish",
-    image: "/images/oatmeal.jpg",
-    title: "Вівсянка з фруктами",
-    description: "Вівсянка, Молоко...",
-    price: "18.50",
-    portion: "(~ 125 ₴ порція)",
-    calories: "285",
-    protein: "32",
-    fat: "12",
-    carbs: "8",
-  },
-  {
-    id: 2,
-    type: "dish",
-    image: "/images/carbonara.jpg",
-    title: 'Паста "Карбонара"',
-    description: "Спагеті, Бекон...",
-    price: "18.50",
-    portion: "(~ 125 ₴ порція)",
-    calories: "285",
-    protein: "32",
-    fat: "12",
-    carbs: "8",
-  },
-  {
-    id: 3,
-    type: "product",
-    image: "/images/cheese.jpg",
-    title: "Сир коров'ячий",
-    description: "Сир коров'ячий...",
-    price: "18.50",
-    portion: "(~ 125 ₴ порція)",
-    calories: "285",
-    protein: "32",
-    fat: "12",
-    carbs: "8",
-  },
-  {
-    id: 4,
-    type: "drink",
-    image: "/images/tea.jpg",
-    title: "Чорний чай",
-    description: "Чорний чай без цукру",
-    price: "18.50",
-    portion: "(~ 125 ₴ порція)",
-    calories: "285",
-    protein: "32",
-    fat: "12",
-    carbs: "8",
-  },
-  {
-    id: 5,
-    type: "product",
-    image: "/images/apple.jpg",
-    title: "Яблуко зелене",
-    description: "Просто яблуко :)",
-    price: "18.50",
-    portion: "(~ 125 ₴ порція)",
-    calories: "285",
-    protein: "32",
-    fat: "12",
-    carbs: "8",
-  },
-];
+// Test
+const API_URL =
+  "https://a11181f3-741e-47c2-affd-e0db7eeb352c.mock.pstmn.io/api/dishes";
 
 function DishesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [allDishes, setAllDishes] = useState([]);
   const [dishes, setDishes] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let filtered = MOCK_DATA;
+    setIsLoading(true);
+    fetch(API_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch dishes");
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Dishes loaded:", data);
+        setAllDishes(data);
+        setDishes(data);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (allDishes.length === 0) return;
+
+    let filtered = allDishes;
 
     if (activeFilter !== "all") {
       filtered = filtered.filter((dish) => dish.type === activeFilter);
     }
+
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((dish) =>
         dish.title.toLowerCase().includes(query)
       );
     }
+
     setDishes(filtered);
-    // fetch(`/api/dishes?filter=${activeFilter}`)
-    //   .then(res => res.json())
-    //   .then(data => setDishes(data));
-  }, [activeFilter, searchQuery]);
+  }, [activeFilter, searchQuery, allDishes]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -185,11 +140,15 @@ function DishesPage() {
 
         <span className={styles.count}>{dishes.length} dishes found</span>
 
-        <div className={styles.dishesGrid}>
-          {dishes.map((meal) => (
-            <MealCard key={meal.id} data={meal} />
-          ))}
-        </div>
+        {isLoading ? (
+          <p>Завантаження...</p>
+        ) : (
+          <div className={styles.dishesGrid}>
+            {dishes.map((meal) => (
+              <MealCard key={meal.id} data={meal} />
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
