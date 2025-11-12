@@ -2,17 +2,8 @@ import React from "react";
 import styles from "./StatisticSection.module.css";
 import StatisticCard from "../StatisticCard/StatisticCard";
 
-function StatisticSection() {
-  // 1. Дані-заглушки
-  const stats = {
-    totalCost: "165.50",
-    totalCalories: "2270",
-    macros: {
-      protein: "170г",
-      fat: "74г",
-      carbs: "230г",
-    },
-  };
+function StatisticSection({ stats }) {
+  if (!stats) return null;
 
   return (
     <div className={styles.statisticSection}>
