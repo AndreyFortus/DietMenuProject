@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from .models import Product
+from .models import Dish
 
-
-class ProductSerializer(serializers.ModelSerializer):
+class DishSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product
-        fields = ['id', 'name', 'calories_per_100g', 'category']
+        model = Dish
+        fields = ['id', 'type', 'image', 'title', 'description', 'price', 'portion',
+                  'calories', 'protein', 'fat', 'carbs']
