@@ -38,4 +38,62 @@
   display: flex;
   gap: 24px;
   overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 4px;
+}
+.list::-webkit-scrollbar {
+  display: none;
+}
+
+.sliderCard {
+  box-sizing: border-box !important;
+  flex: 1 1 0% !important;
+  min-width: 368 !important;
+  width: auto !important;
+  max-width: 100% !important;
+}
+
+.sliderWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.sliderBtn {
+  position: absolute;
+  top: 198px;
+  transform: translateY(-50%);
+  z-index: 10;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  width: auto;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.sliderBtn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.sliderBtn:hover {
+  background: transparent;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.sliderBtn svg {
+  display: block;
+}
+
+.leftBtn {
+  left: -20px;
+}
+
+.rightBtn {
+  right: -20px;
 }
