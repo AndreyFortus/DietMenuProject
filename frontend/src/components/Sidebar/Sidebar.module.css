@@ -1,0 +1,129 @@
+.sidebar {
+  width: 240px;
+  border-right: 1px solid #e9edeb;
+  background-color: #ffffff;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: width 0.3s ease;
+  flex-shrink: 0;
+}
+
+.upBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 18px;
+  border-bottom: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 20px;
+  color: #333;
+  text-decoration: none;
+}
+
+.logo span {
+  font-family: "Inter", sans-serif;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 18px;
+  gap: 8px;
+}
+
+.navLink,
+.activeLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.navLink {
+  color: #344256;
+  background-color: transparent;
+}
+.navLink:hover {
+  background-color: #f5f5f5;
+}
+
+.activeLink {
+  color: #4caf50;
+}
+
+.bottomSection {
+  border-top: 1px solid #e8e8e8;
+}
+
+.toggleButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #333;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+}
+
+.toggleButton:hover {
+  background-color: #f5f5f5;
+}
+.toggleButton svg {
+  display: block;
+  width: 36px;
+  height: 36px;
+  transition: transform 0.3s ease;
+}
+
+.closed {
+  width: 80px;
+}
+
+.closed .logo span,
+.closed .navLink span,
+.closed .activeLink span,
+.closed .toggleButton span {
+  display: none;
+}
+
+.closed .upBar {
+  justify-content: center;
+}
+
+.closed .navLink,
+.closed .activeLink {
+  justify-content: center;
+}
+
+.closed .toggleButton {
+  justify-content: center;
+}
+
+.closed .toggleButton svg {
+  transform: rotate(180deg);
+}

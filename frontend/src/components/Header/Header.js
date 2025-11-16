@@ -2,7 +2,8 @@ import React from "react";
 import styles from "./Header.module.css";
 import Button from "../Button/Button";
 import { ReactComponent as LogoIcon } from "../../assets/logo-icon.svg";
-import { ReactComponent as PlusIcon } from "../../assets/plus-icon.svg";
+import { ReactComponent as SparkleIcon } from "../../assets/sparkle-icon.svg";
+import { Link } from "react-router-dom";
 
 function Header() {
   return (
@@ -14,9 +15,11 @@ function Header() {
         </div>
 
         <nav>
-          <Button variant="primary" iconBefore={<PlusIcon />}>
-            Сформувати раціон
-          </Button>
+          <Link to="/calculator" className={styles.navLink}>
+            <Button variant="primary" iconBefore={<SparkleIcon />}>
+              Сформувати раціон
+            </Button>
+          </Link>
         </nav>
       </div>
     </header>

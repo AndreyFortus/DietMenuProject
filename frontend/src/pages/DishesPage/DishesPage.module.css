@@ -1,0 +1,134 @@
+.dishesPage {
+  display: flex;
+}
+
+.mainContent {
+  width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 40px;
+  margin: 0px auto;
+  transition: width 0.3s ease;
+}
+
+.mainContentExpanded {
+  width: 1368px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header h1 {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 32px;
+  color: #344256;
+  margin: 0;
+}
+
+.header p {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #64748b;
+  margin: 0;
+}
+
+.searchBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 21px 25px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px 0 #0000000d;
+}
+
+.filterHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filterHeader h3 {
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  color: #344256;
+  margin: 0;
+}
+
+.filterHeader p {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.searchBar input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+}
+
+.filterList {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.filterButton,
+.filterActive {
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 16px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.filterButton {
+  background-color: transparent;
+  border: 1px solid #e2e8f0;
+  color: #344256;
+}
+.filterButton:hover {
+  background-color: #f5f5f5;
+}
+
+.filterActive {
+  background-color: #4caf50;
+  border-color: #4caf50;
+  color: #ffffff;
+}
+
+.count {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.dishesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
