@@ -4,9 +4,7 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import MealCard from "../../components/MealCard/MealCard";
 import { ReactComponent as SearchIcon } from "../../assets/search-icon.svg";
 
-// Test
-const API_URL =
-  "https://a11181f3-741e-47c2-affd-e0db7eeb352c.mock.pstmn.io/api/dishes";
+const API_URL = "http://127.0.0.1:8000/api/products/";
 
 function DishesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
