@@ -1,3 +1,4 @@
+from django.db import connection
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from .models import Dish
@@ -5,7 +6,10 @@ from .models import Dish
 
 @receiver(post_migrate)
 def create_initial_data(sender, **kwargs):
-    if sender.name != 'core':
+    if sender.label != 'core':
+        return
+
+    if 'core_dish' not in connection.introspection.table_names():
         return
 
     initial_dishes = [
