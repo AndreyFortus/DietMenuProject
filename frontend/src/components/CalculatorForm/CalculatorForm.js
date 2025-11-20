@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import styles from "./CalculatorForm.module.css";
 import Button from "../Button/Button";
 import NutrientInput from "../NutrientInput/NutrientInput";
@@ -7,45 +7,21 @@ import { ReactComponent as SearchIcon } from "../../assets/search-icon.svg";
 import { ReactComponent as SparkleIcon } from "../../assets/sparkle-icon.svg";
 import { ReactComponent as ChevronUpIcon } from "../../assets/chevron-up.svg";
 
-const MOCK_PRODUCTS = {
-  column1: [
-    { id: "p1", name: "Куряче філе", checked: true },
-    { id: "p2", name: "Яловичина", checked: true },
-    { id: "p3", name: "Свинина", checked: false },
-    { id: "p4", name: "Рис", checked: true },
-    { id: "p5", name: "Гречка", checked: false },
-    { id: "p6", name: "Вівсянка", checked: false },
-    { id: "p7", name: "Помідори", checked: false },
-    { id: "p8", name: "Огірки", checked: false },
-  ],
-  column2: [
-    { id: "p9", name: "Яблуко", checked: true },
-    { id: "p10", name: "Чай", checked: true },
-    { id: "p11", name: "Кава", checked: false },
-    { id: "p12", name: "Сир коров'ячий", checked: true },
-    { id: "p13", name: "Макарони", checked: false },
-    { id: "p14", name: "Яйця", checked: false },
-    { id: "p15", name: "Сало", checked: false },
-    { id: "p16", name: "Майонез", checked: false },
-  ],
-  column3: [
-    { id: "p17", name: "Борщ", checked: true },
-    { id: "p18", name: "Картопля смажена", checked: true },
-    { id: "p19", name: "Запечений лосось", checked: false },
-    { id: "p20", name: "Курка з овочами", checked: true },
-    { id: "p21", name: "Суп з фрикадельками", checked: false },
-  ],
-};
+const PRODUCTS_API_URL = "http://127.0.0.1:8000/api/products/";
+const CALCULATE_API_URL =
+  "https://a11181f3-741e-47c2-affd-e0db7eeb352c.mock.pstmn.io/api/calculate-ration";
 
 const MIN_VALUES = {
   protein: 40,
-  fat: 35,
+  fat: 30,
   carbs: 50,
 };
 
 function CalculatorForm({ onGenerate }) {
   const [isProductsOpen, setIsProductsOpen] = useState(true);
-  const [products, setProducts] = useState(MOCK_PRODUCTS);
+  const [allProducts, setAllProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const [macros, setMacros] = useState({
     protein: "",
@@ -54,64 +30,88 @@ function CalculatorForm({ onGenerate }) {
   });
 
   const [errors, setErrors] = useState({});
+  const [loadError, setLoadError] = useState(null);
 
-  const handleClearAll = () => {
-    const clearedProducts = {
-      column1: products.column1.map((p) => ({ ...p, checked: false })),
-      column2: products.column2.map((p) => ({ ...p, checked: false })),
-      column3: products.column3.map((p) => ({ ...p, checked: false })),
-    };
-    setProducts(clearedProducts);
-  };
+  useEffect(() => {
+    const ac = new AbortController();
+    let mounted = true;
 
-  const handleCheckboxChange = (columnName, productId) => {
-    setProducts((prevProducts) => ({
-      ...prevProducts,
-      [columnName]: prevProducts[columnName].map((product) =>
-        product.id === productId
-          ? { ...product, checked: !product.checked }
-          : product
-      ),
-    }));
-  };
-
-  const handleMacroChange = (field, value) => {
-    setMacros((prev) => ({ ...prev, [field]: value }));
-
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: null }));
+    async function load() {
+      try {
+        console.log("Loading products from", PRODUCTS_API_URL);
+        const res = await fetch(PRODUCTS_API_URL, { signal: ac.signal });
+        if (!res.ok) throw new Error(`Products fetch failed: ${res.status}`);
+        const data = await res.json();
+        if (!mounted) return;
+        const productsWithState = data.map((p) => ({ ...p, checked: false }));
+        setAllProducts(productsWithState);
+        console.log("Products loaded:", productsWithState.length);
+      } catch (err) {
+        if (err.name === "AbortError") return;
+        console.error("Error loading products:", err);
+        setLoadError("Не вдалося завантажити продукти");
+      }
     }
-  };
 
-  const validate = () => {
+    load();
+    return () => {
+      mounted = false;
+      ac.abort();
+    };
+  }, []);
+
+  const filteredProducts = useMemo(() => {
+    const q = (searchQuery || "").trim().toLowerCase();
+    if (!q) return allProducts;
+    return allProducts.filter((p) => (p.title || "").toLowerCase().includes(q));
+  }, [allProducts, searchQuery]);
+
+  const columns = useMemo(() => {
+    const cols = [[], [], []];
+    filteredProducts.forEach((product, index) => {
+      cols[index % 3].push(product);
+    });
+    return cols;
+  }, [filteredProducts]);
+
+  const handleCheckboxChange = useCallback((id) => {
+    setAllProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, checked: !p.checked } : p))
+    );
+  }, []);
+
+  const handleClearAll = useCallback(() => {
+    setAllProducts((prev) => prev.map((p) => ({ ...p, checked: false })));
+  }, []);
+
+  const handleMacroChange = useCallback(
+    (field, value) => {
+      setMacros((prev) => ({ ...prev, [field]: value }));
+      if (errors[field]) {
+        setErrors((prev) => ({ ...prev, [field]: null }));
+      }
+    },
+    [errors]
+  );
+
+  const validate = useCallback(() => {
     const newErrors = {};
-
     if (!macros.protein || Number(macros.protein) < MIN_VALUES.protein) {
-      newErrors.protein = `Мін. ${MIN_VALUES.protein}г (безпечна норма)`;
+      newErrors.protein = `Мін. ${MIN_VALUES.protein}г`;
     }
     if (!macros.fat || Number(macros.fat) < MIN_VALUES.fat) {
-      newErrors.fat = `Мін. ${MIN_VALUES.fat}г (безпечна норма)`;
+      newErrors.fat = `Мін. ${MIN_VALUES.fat}г`;
     }
     if (!macros.carbs || Number(macros.carbs) < MIN_VALUES.carbs) {
-      newErrors.carbs = `Мін. ${MIN_VALUES.carbs}г (безпечна норма)`;
+      newErrors.carbs = `Мін. ${MIN_VALUES.carbs}г`;
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [macros]);
 
-  const handleSubmit = () => {
-    if (!validate()) {
-      return;
-    }
-
-    const selectedProducts = [
-      ...products.column1,
-      ...products.column2,
-      ...products.column3,
-    ]
-      .filter((p) => p.checked)
-      .map((p) => p.name);
+  const handleSubmit = useCallback(async () => {
+    if (!validate()) return;
+    const selectedProducts = allProducts.filter((p) => p.checked);
 
     const requestData = {
       target_macros: {
@@ -122,42 +122,57 @@ function CalculatorForm({ onGenerate }) {
       selected_products: selectedProducts,
     };
 
-    console.log("🚀 Sending data to backend:", requestData);
+    console.log("Sending data to backend:", requestData);
 
-    // Test
-    const API_URL =
-      "https://a11181f3-741e-47c2-affd-e0db7eeb352c.mock.pstmn.io/api/calculate-ration";
-
-    fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestData),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Success from API:", data);
-
-        if (onGenerate) {
-          onGenerate(data);
-        }
-      })
-      .catch((error) => console.error("Error:", error));
-  };
+    setIsLoading(true);
+    try {
+      const res = await fetch(CALCULATE_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData),
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => null);
+        throw new Error(text || `Server error ${res.status}`);
+      }
+      const data = await res.json();
+      console.log("Received response:", data);
+      if (onGenerate) onGenerate(data);
+    } catch (err) {
+      console.error("Calculate error:", err);
+      alert("Помилка сервера. Спробуйте пізніше.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [macros, allProducts, validate, onGenerate]);
 
   const contentClassName = isProductsOpen
     ? styles.productsContent
     : `${styles.productsContent} ${styles.productsContentClosed}`;
 
+  const selectedCount = useMemo(
+    () => allProducts.filter((p) => p.checked).length,
+    [allProducts]
+  );
+
+  const renderColumn = (col) => {
+    if (!col.length) return <div className={styles.emptyColumn}>—</div>;
+    return col.map((product) => (
+      <label key={product.id} className={styles.checkboxLabel}>
+        <input
+          type="checkbox"
+          checked={!!product.checked}
+          onChange={() => handleCheckboxChange(product.id)}
+          aria-checked={!!product.checked}
+        />
+        <span className={styles.customCheckbox} aria-hidden="true"></span>
+        <span className={styles.productTitle}>{product.title}</span>
+      </label>
+    ));
+  };
+
   return (
-    <div className={styles.calculatorForm}>
-      {/* 1. СЕКЦІЯ "ВАШІ ПАРАМЕТРИ" */}
+    <div className={styles.calculatorForm} aria-busy={isLoading}>
       <div className={styles.parameterSection}>
         <div className={styles.textBlock}>
           <h3>Ваші параметри</h3>
@@ -168,25 +183,24 @@ function CalculatorForm({ onGenerate }) {
           <NutrientInput
             label="Білки (г)"
             value={macros.protein}
-            onChange={(val) => handleMacroChange("protein", val)}
+            onChange={(v) => handleMacroChange("protein", v)}
             error={errors.protein}
           />
           <NutrientInput
             label="Жири (г)"
             value={macros.fat}
-            onChange={(val) => handleMacroChange("fat", val)}
+            onChange={(v) => handleMacroChange("fat", v)}
             error={errors.fat}
           />
           <NutrientInput
             label="Вуглеводи (г)"
             value={macros.carbs}
-            onChange={(val) => handleMacroChange("carbs", val)}
+            onChange={(v) => handleMacroChange("carbs", v)}
             error={errors.carbs}
           />
         </div>
       </div>
 
-      {/* 2. СЕКЦІЯ "ВИБІР ПРОДУКТІВ" */}
       <div className={styles.productSectionWrapper}>
         <div className={styles.productSection}>
           <div className={styles.productHeader}>
@@ -194,95 +208,82 @@ function CalculatorForm({ onGenerate }) {
               <h3>Вибір продуктів та страв</h3>
               <p>Оберіть продукти або страви для формування раціону</p>
             </div>
-
             <button
               className={styles.chevronUpButton}
-              onClick={() => setIsProductsOpen(!isProductsOpen)}
+              onClick={() => setIsProductsOpen((s) => !s)}
+              aria-expanded={isProductsOpen}
+              aria-label={isProductsOpen ? "Закрити список" : "Відкрити список"}
             >
               <ChevronUpIcon
-                className={!isProductsOpen ? styles.chevronUpButtonRotated : ""}
+                className={isProductsOpen ? "" : styles.iconRotated}
+                aria-hidden="true"
               />
             </button>
           </div>
 
           <div className={contentClassName}>
             <div className={styles.productsContentInner}>
-              {/* Панель пошуку */}
               <div className={styles.searchBar}>
                 <div className={styles.searchInputWrapper}>
-                  <SearchIcon />
+                  <SearchIcon aria-hidden="true" />
                   <input
                     type="text"
                     placeholder="Пошук страв та продуктів..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    aria-label="Пошук продуктів"
                   />
                 </div>
               </div>
 
-              {/* Лічильник обраного */}
-              <span className={styles.selectedCount}>Обрано: N страв</span>
+              <span className={styles.selectedCount}>
+                Обрано: {selectedCount} страв
+              </span>
 
-              {/* Список продуктів */}
+              {loadError && <div className={styles.errorText}>{loadError}</div>}
+
               <div className={styles.productList}>
                 <div className={styles.productColumn}>
-                  {products.column1.map((product) => (
-                    <label key={product.id} className={styles.checkboxLabel}>
-                      <input
-                        type="checkbox"
-                        checked={product.checked}
-                        onChange={() =>
-                          handleCheckboxChange("column1", product.id)
-                        }
-                      />
-                      <span className={styles.customCheckbox}></span>
-                      {product.name}
-                    </label>
-                  ))}
+                  {renderColumn(columns[0])}
                 </div>
                 <div className={styles.productColumn}>
-                  {products.column2.map((product) => (
-                    <label key={product.id} className={styles.checkboxLabel}>
-                      <input
-                        type="checkbox"
-                        checked={product.checked}
-                        onChange={() =>
-                          handleCheckboxChange("column2", product.id)
-                        }
-                      />
-                      <span className={styles.customCheckbox}></span>
-                      {product.name}
-                    </label>
-                  ))}
+                  {renderColumn(columns[1])}
                 </div>
                 <div className={styles.productColumn}>
-                  {products.column3.map((product) => (
-                    <label key={product.id} className={styles.checkboxLabel}>
-                      <input
-                        type="checkbox"
-                        checked={product.checked}
-                        onChange={() =>
-                          handleCheckboxChange("column3", product.id)
-                        }
-                      />
-                      <span className={styles.customCheckbox}></span>
-                      {product.name}
-                    </label>
-                  ))}
+                  {renderColumn(columns[2])}
                 </div>
               </div>
 
-              {/* Кнопка "Скинути" */}
-              <button className={styles.clearButton} onClick={handleClearAll}>
+              <button
+                className={styles.clearButton}
+                onClick={handleClearAll}
+                disabled={isLoading}
+              >
                 Скинути всі обрані страви
               </button>
+
+              {filteredProducts.length === 0 && (
+                <div className={styles.noResults}>
+                  Нічого не знайдено за запитом.
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       <div className={styles.buttonWrapper}>
-        <div onClick={handleSubmit}>
-          <Button variant="primary" iconBefore={<SparkleIcon />}>
-            Згенерувати раціон
+        <div
+          onClick={() => {
+            if (!isLoading) handleSubmit();
+          }}
+        >
+          <Button
+            variant="primary"
+            iconBefore={<SparkleIcon />}
+            disabled={isLoading}
+          >
+            {isLoading ? "Генерація..." : "Згенерувати раціон"}
           </Button>
         </div>
       </div>
