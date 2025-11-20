@@ -112,10 +112,6 @@ function CalculatorForm({ onGenerate }) {
   const handleSubmit = useCallback(async () => {
     if (!validate()) return;
     const selectedProducts = allProducts.filter((p) => p.checked);
-    if (selectedProducts.length === 0) {
-      alert("Оберіть принаймні одну страву або продукт");
-      return;
-    }
 
     const requestData = {
       target_macros: {
