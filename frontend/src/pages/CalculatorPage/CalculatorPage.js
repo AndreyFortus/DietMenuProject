@@ -12,7 +12,6 @@ function CalculatorPage() {
   const [apiData, setApiData] = useState(null);
 
   const handleGenerate = (data) => {
-    console.log("Received data from form:", data);
     setApiData(data);
     setShowResults(true);
   };

@@ -80,7 +80,7 @@
   height: 36px;
   transition: transform 0.3s ease;
 }
-.chevronUpButtonRotated {
+.iconRotated {
   transform: rotate(180deg);
 }
 
