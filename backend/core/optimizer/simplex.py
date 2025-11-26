@@ -138,6 +138,9 @@ def build_products_from_queryset(qs):
             carbs = float(d.carbs or 0)
             calories = float(d.calories or 0)
             price = float(d.price or 0)
+            description = getattr(d, 'description', '')
+            img = getattr(d, 'image', None)
+            image_url = f'http://127.0.0.1:8000{img.url}' if img else ''
         else:
             title = d.get('title')
             protein = float(d.get('protein', 0))
@@ -145,7 +148,9 @@ def build_products_from_queryset(qs):
             carbs = float(d.get('carbs', 0))
             calories = float(d.get('calories', 0))
             price = float(d.get('price', 0))
-        products.append((title, protein, fat, carbs, calories, price))
+            description = d.get('description', '')
+            image_url = d.get('image', '')
+        products.append((title, protein, fat, carbs, calories, price, description, image_url))
     return products
 
 
@@ -174,7 +179,7 @@ def optimize_meal(products, Pmin, Fmin, Hmin, Emax):
 
     for j, qty in enumerate(x):
         if qty > 1e-6:
-            title = product_list[j][0]
+            title, _, _, _, _, _, description, image_url = product_list[j]
             grams = float(qty)
             cost = float(costs[j] * grams)
             prot = proteins[j] * grams
@@ -190,6 +195,8 @@ def optimize_meal(products, Pmin, Fmin, Hmin, Emax):
                 'fat': round(fat, 2),
                 'carbs': round(carb, 2),
                 'calories': round(kcal, 2),
+                'description': description,
+                'image': image_url
             })
 
             total_prot += prot
