@@ -9,7 +9,7 @@ import { ReactComponent as ChevronUpIcon } from "../../assets/chevron-up.svg";
 
 const PRODUCTS_API_URL = "http://127.0.0.1:8000/api/products/";
 const CALCULATE_API_URL = "http://127.0.0.1:8000/api/optimize-meal/";
-  // "https://a11181f3-741e-47c2-affd-e0db7eeb352c.mock.pstmn.io/api/calculate-ration";
+// "https://a11181f3-741e-47c2-affd-e0db7eeb352c.mock.pstmn.io/api/calculate-ration";
 
 const MIN_VALUES = {
   protein: 40,
@@ -146,7 +146,6 @@ function CalculatorForm({ onGenerate }) {
 
       const formatMealItems = (items) => {
         if (!items || !Array.isArray(items)) {
-          console.warn("Items is not an array:", items);
           return [];
         }
 
@@ -157,6 +156,7 @@ function CalculatorForm({ onGenerate }) {
           image: item.image || "",
           price: item.cost ? item.cost.toFixed(2) : "0.00",
           portion: `(~ ${item.cost ? item.cost.toFixed(0) : 0} ₴ порція)`,
+          weight: item.grams ? item.grams.toFixed(0) : null,
           calories: item.calories ? item.calories.toFixed(0) : "0",
           protein: item.protein ? item.protein.toFixed(0) : "0",
           fat: item.fat ? item.fat.toFixed(0) : "0",
@@ -251,7 +251,10 @@ function CalculatorForm({ onGenerate }) {
       <div className={styles.parameterSection}>
         <div className={styles.textBlock}>
           <h3>Ваші параметри</h3>
-          <p>Введіть бажану мінімальну кількість білків, жирів, вуглеводів та бажану максимальну кількість калорій.</p>
+          <p>
+            Введіть бажану мінімальну кількість білків, жирів, вуглеводів та
+            бажану максимальну кількість калорій.
+          </p>
         </div>
 
         <div className={styles.inputList}>

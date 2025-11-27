@@ -12,7 +12,14 @@ function MealCard({ data }) {
     protein,
     fat,
     carbs,
+    weight,
   } = data;
+
+  const nutrientLabel = weight
+    ? `Харчова цінність (на ${weight} г):`
+    : "Харчова цінність (на 100 г):";
+
+  const unitLabel = weight ? `/ ${weight}г` : "/ 100г";
 
   return (
     <div className={styles.card}>
@@ -24,13 +31,11 @@ function MealCard({ data }) {
 
         <div className={styles.infoWrap}>
           <span className={styles.price}>{price}₴</span>
-          <span className={styles.unit}>/ 100г</span>
+          <span className={styles.unit}>{unitLabel}</span>
           <span className={styles.portion}>{portion}</span>
         </div>
 
-        <label className={styles.nutrientLabel}>
-          Харчова цінність (на 100 г):
-        </label>
+        <label className={styles.nutrientLabel}>{nutrientLabel}</label>
 
         <div className={styles.nutrientBlock}>
           <div className={styles.nutrient}>
