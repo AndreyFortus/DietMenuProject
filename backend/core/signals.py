@@ -225,12 +225,6 @@ def create_initial_data(sender, **kwargs):
         #  'portion': '(~ 200 мл порція)', 'calories': 5, 'protein': 0, 'fat': 0, 'carbs': 1},
     ]
 
-    for data in initial_dishes:
-        Dish.objects.update_or_create(
-            id=data['id'],
-            defaults=data
-        )
-
     for dish_data in initial_dishes:
         image_url = f"{settings.STATIC_URL}images/{dish_data['image']}"
 
