@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from "./RationSection.module.css";
 import MealCard from "../MealCard/MealCard";
 
@@ -10,10 +10,17 @@ import { ReactComponent as SliderRight } from "../../assets/slider-right.svg";
 
 function RationSection({ meals }) {
   const [activeTab, setActiveTab] = useState("breakfast");
-
   const listRef = useRef(null);
 
+  useEffect(() => {
+    if (listRef.current) {
+      listRef.current.scrollTo({ left: 0, behavior: "auto" });
+    }
+  }, [activeTab]);
+
   if (!meals) return null;
+
+  const currentList = meals[activeTab] || [];
 
   const scroll = (direction) => {
     if (listRef.current) {
@@ -55,14 +62,25 @@ function RationSection({ meals }) {
         <button
           className={`${styles.sliderBtn} ${styles.leftBtn}`}
           onClick={() => scroll("left")}
+          disabled={currentList.length === 0}
         >
           <SliderLeft />
         </button>
 
         <div className={styles.list} ref={listRef}>
-          {meals.map((meal) => (
-            <MealCard key={meal.id} data={meal} className={styles.sliderCard} />
-          ))}
+          {currentList.length > 0 ? (
+            currentList.map((meal) => (
+              <MealCard
+                key={meal.id}
+                data={meal}
+                className={styles.sliderCard}
+              />
+            ))
+          ) : (
+            <div className={styles.emptyMessage}>
+              Немає страв для цієї категорії
+            </div>
+          )}
         </div>
 
         <button

@@ -144,26 +144,68 @@ function CalculatorForm({ onGenerate }) {
       const data = await res.json();
       console.log("Received response:", data);
 
-      const formattedData = {
-        ration: data.items.map((item, index) => ({
-          id: item.id || index,
+      const formatMealItems = (items) => {
+        if (!items || !Array.isArray(items)) {
+          console.warn("Items is not an array:", items);
+          return [];
+        }
+
+        return items.map((item, index) => ({
+          id: item.id || `${Date.now()}-${index}`,
           title: item.name,
           description: item.description || "",
           image: item.image || "",
-          price: item.cost.toFixed(2),
-          portion: `(~ ${item.cost.toFixed(0)} ₴ порція)`,
-          calories: item.calories.toFixed(0),
-          protein: item.protein.toFixed(0),
-          fat: item.fat.toFixed(0),
-          carbs: item.carbs.toFixed(0),
-        })),
+          price: item.cost ? item.cost.toFixed(2) : "0.00",
+          portion: `(~ ${item.cost ? item.cost.toFixed(0) : 0} ₴ порція)`,
+          calories: item.calories ? item.calories.toFixed(0) : "0",
+          protein: item.protein ? item.protein.toFixed(0) : "0",
+          fat: item.fat ? item.fat.toFixed(0) : "0",
+          carbs: item.carbs ? item.carbs.toFixed(0) : "0",
+        }));
+      };
+
+      const formattedMeals = {
+        breakfast: formatMealItems(data.breakfast?.items),
+        lunch: formatMealItems(data.lunch?.items),
+        dinner: formatMealItems(data.dinner?.items),
+      };
+
+      const getTotal = (mealData, field) => {
+        return mealData?.totals?.[field] || 0;
+      };
+
+      const totalStats = {
+        price:
+          getTotal(data.breakfast, "price") +
+          getTotal(data.lunch, "price") +
+          getTotal(data.dinner, "price"),
+        calories:
+          getTotal(data.breakfast, "calories") +
+          getTotal(data.lunch, "calories") +
+          getTotal(data.dinner, "calories"),
+        protein:
+          getTotal(data.breakfast, "protein") +
+          getTotal(data.lunch, "protein") +
+          getTotal(data.dinner, "protein"),
+        fat:
+          getTotal(data.breakfast, "fat") +
+          getTotal(data.lunch, "fat") +
+          getTotal(data.dinner, "fat"),
+        carbs:
+          getTotal(data.breakfast, "carbs") +
+          getTotal(data.lunch, "carbs") +
+          getTotal(data.dinner, "carbs"),
+      };
+
+      const formattedData = {
+        meals: formattedMeals,
         statistics: {
-          totalCost: data.totals.price.toFixed(2),
-          totalCalories: data.totals.calories.toFixed(0),
+          totalCost: totalStats.price.toFixed(2),
+          totalCalories: totalStats.calories.toFixed(0),
           macros: {
-            protein: `${data.totals.protein.toFixed(0)}г`,
-            fat: `${data.totals.fat.toFixed(0)}г`,
-            carbs: `${data.totals.carbs.toFixed(0)}г`,
+            protein: `${totalStats.protein.toFixed(0)}г`,
+            fat: `${totalStats.fat.toFixed(0)}г`,
+            carbs: `${totalStats.carbs.toFixed(0)}г`,
           },
         },
       };
