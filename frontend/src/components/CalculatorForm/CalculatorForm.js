@@ -143,7 +143,34 @@ function CalculatorForm({ onGenerate }) {
       }
       const data = await res.json();
       console.log("Received response:", data);
-      if (onGenerate) onGenerate(data);
+
+      const formattedData = {
+        ration: data.items.map((item, index) => ({
+          id: item.id || index,
+          title: item.name,
+          description: item.description || "",
+          image: item.image || "",
+          price: item.cost.toFixed(2),
+          portion: `(~ ${item.cost.toFixed(0)} ₴ порція)`,
+          calories: item.calories.toFixed(0),
+          protein: item.protein.toFixed(0),
+          fat: item.fat.toFixed(0),
+          carbs: item.carbs.toFixed(0),
+        })),
+        statistics: {
+          totalCost: data.totals.price.toFixed(2),
+          totalCalories: data.totals.calories.toFixed(0),
+          macros: {
+            protein: `${data.totals.protein.toFixed(0)}г`,
+            fat: `${data.totals.fat.toFixed(0)}г`,
+            carbs: `${data.totals.carbs.toFixed(0)}г`,
+          },
+        },
+      };
+
+      setIsProductsOpen(true);
+
+      if (onGenerate) onGenerate(formattedData);
     } catch (err) {
       console.error("Calculate error:", err);
       alert("Помилка сервера. Спробуйте пізніше.");
