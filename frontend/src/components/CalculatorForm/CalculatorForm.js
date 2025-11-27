@@ -8,13 +8,14 @@ import { ReactComponent as SparkleIcon } from "../../assets/sparkle-icon.svg";
 import { ReactComponent as ChevronUpIcon } from "../../assets/chevron-up.svg";
 
 const PRODUCTS_API_URL = "http://127.0.0.1:8000/api/products/";
-const CALCULATE_API_URL =
-  "https://a11181f3-741e-47c2-affd-e0db7eeb352c.mock.pstmn.io/api/calculate-ration";
+const CALCULATE_API_URL = "http://127.0.0.1:8000/api/optimize-meal/";
+  // "https://a11181f3-741e-47c2-affd-e0db7eeb352c.mock.pstmn.io/api/calculate-ration";
 
 const MIN_VALUES = {
   protein: 40,
   fat: 30,
   carbs: 50,
+  calories: 200,
 };
 
 function CalculatorForm({ onGenerate }) {
@@ -27,6 +28,7 @@ function CalculatorForm({ onGenerate }) {
     protein: "",
     fat: "",
     carbs: "",
+    calories: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -105,6 +107,9 @@ function CalculatorForm({ onGenerate }) {
     if (!macros.carbs || Number(macros.carbs) < MIN_VALUES.carbs) {
       newErrors.carbs = `Мін. ${MIN_VALUES.carbs}г`;
     }
+    if (!macros.calories || Number(macros.calories) < MIN_VALUES.calories) {
+      newErrors.calories = `Мін. ${MIN_VALUES.calories} ккал`;
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }, [macros]);
@@ -118,6 +123,7 @@ function CalculatorForm({ onGenerate }) {
         protein: Number(macros.protein),
         fat: Number(macros.fat),
         carbs: Number(macros.carbs),
+        calories: Number(macros.calories),
       },
       selected_products: selectedProducts,
     };
@@ -176,7 +182,7 @@ function CalculatorForm({ onGenerate }) {
       <div className={styles.parameterSection}>
         <div className={styles.textBlock}>
           <h3>Ваші параметри</h3>
-          <p>Введіть денну норму макронутрієнтів</p>
+          <p>Введіть бажану мінімальну кількість білків, жирів, вуглеводів та бажану максимальну кількість калорій.</p>
         </div>
 
         <div className={styles.inputList}>
@@ -197,6 +203,12 @@ function CalculatorForm({ onGenerate }) {
             value={macros.carbs}
             onChange={(v) => handleMacroChange("carbs", v)}
             error={errors.carbs}
+          />
+          <NutrientInput
+            label="Калорії (ккал)"
+            value={macros.calories}
+            onChange={(v) => handleMacroChange("calories", v)}
+            error={errors.calories}
           />
         </div>
       </div>
