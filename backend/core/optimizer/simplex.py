@@ -31,20 +31,25 @@ def find_leaving_var(tableau, pivot_col, tol=1e-12):
 
 def build_tableau_M(A, b, c_minimize, ineq_sense):
     m, n = A.shape
-    var_names = [f'x{j+1}' for j in range(n)]
+    var_names = [f'x{j + 1}' for j in range(n)]
     blocks = [A.copy()]
     art_cols = []
 
     for i, s in enumerate(ineq_sense):
         if s == '<=':
-            col = np.zeros((m, 1)); col[i, 0] = 1
+            col = np.zeros((m, 1))
+            col[i, 0] = 1
             blocks.append(col)
-            var_names.append(f's{i+1}')
+            var_names.append(f's{i + 1}')
         elif s == '>=':
-            col_sur = np.zeros((m, 1)); col_sur[i, 0] = -1
-            col_art = np.zeros((m, 1)); col_art[i, 0] = 1
-            blocks.append(col_sur); var_names.append(f's{i+1}_sur')
-            blocks.append(col_art); var_names.append(f'a{i+1}')
+            col_sur = np.zeros((m, 1))
+            col_sur[i, 0] = -1
+            col_art = np.zeros((m, 1))
+            col_art[i, 0] = 1
+            blocks.append(col_sur)
+            var_names.append(f's{i + 1}_sur')
+            blocks.append(col_art)
+            var_names.append(f'a{i + 1}')
             art_cols.append(len(var_names) - 1)
         else:
             raise ValueError("ineq_sense must be '<=' or '>='")
@@ -71,7 +76,7 @@ def build_tableau_M(A, b, c_minimize, ineq_sense):
             if art_cols:
                 basic_vars.append(art_cols.pop(0))
             else:
-                raise RuntimeError(f'Не знайдено базис для обмеження {i+1}')
+                raise RuntimeError(f'Не знайдено базис для обмеження {i + 1}')
 
     for bi in basic_vars:
         name = var_names[bi]
