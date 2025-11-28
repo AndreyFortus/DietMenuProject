@@ -37,7 +37,7 @@ function CalculatorPage() {
         <CalculatorForm onGenerate={handleGenerate} />
         {showResults && (
           <>
-            <RationSection meals={apiData.ration} />
+            <RationSection meals={apiData.meals} />
             <StatisticSection stats={apiData.statistics} />
           </>
         )}

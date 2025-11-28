@@ -14,5 +14,7 @@ class Dish(models.Model):
     fat = models.FloatField(default=0)
     carbs = models.FloatField(default=0)
 
+    meal_type = models.CharField(max_length=20, default='breakfast')
+
     def __str__(self):
         return self.title
