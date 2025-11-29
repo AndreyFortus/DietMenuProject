@@ -59,13 +59,15 @@ function RationSection({ meals }) {
       </nav>
 
       <div className={styles.sliderWrapper}>
-        <button
-          className={`${styles.sliderBtn} ${styles.leftBtn}`}
-          onClick={() => scroll("left")}
-          disabled={currentList.length === 0}
-        >
-          <SliderLeft />
-        </button>
+        {currentList.length > 3 && (
+          <button
+            className={`${styles.sliderBtn} ${styles.leftBtn}`}
+            onClick={() => scroll("left")}
+            disabled={currentList.length === 0}
+          >
+            <SliderLeft />
+          </button>
+        )}
 
         <div className={styles.list} ref={listRef}>
           {currentList.length > 0 ? (
@@ -83,12 +85,14 @@ function RationSection({ meals }) {
           )}
         </div>
 
-        <button
-          className={`${styles.sliderBtn} ${styles.rightBtn}`}
-          onClick={() => scroll("right")}
-        >
-          <SliderRight />
-        </button>
+        {currentList.length > 3 && (
+          <button
+            className={`${styles.sliderBtn} ${styles.rightBtn}`}
+            onClick={() => scroll("right")}
+          >
+            <SliderRight />
+          </button>
+        )}
       </div>
     </div>
   );
