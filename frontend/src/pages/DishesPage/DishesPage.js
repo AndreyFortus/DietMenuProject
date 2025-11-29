@@ -10,7 +10,8 @@ function DishesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [allDishes, setAllDishes] = useState([]);
   const [dishes, setDishes] = useState([]);
-  const [activeFilter, setActiveFilter] = useState("all");
+  // const [activeFilter, setActiveFilter] = useState("all");
+  const [activeFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
