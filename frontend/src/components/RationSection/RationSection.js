@@ -8,15 +8,20 @@ import { ReactComponent as DinnerIcon } from "../../assets/dinner-icon.svg";
 import { ReactComponent as SliderLeft } from "../../assets/slider-left.svg";
 import { ReactComponent as SliderRight } from "../../assets/slider-right.svg";
 
-function RationSection({ meals }) {
+function RationSection({ meals, resetTab, onResetDone }) {
   const [activeTab, setActiveTab] = useState("breakfast");
   const listRef = useRef(null);
 
   useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTo({ left: 0, behavior: "auto" });
+    if (resetTab) {
+      setActiveTab("breakfast");
+
+      if (listRef.current) {
+        listRef.current.scrollTo({ left: 0, behavior: "auto" });
+      }
+      if (onResetDone) onResetDone();
     }
-  }, [activeTab]);
+  }, [resetTab, onResetDone]);
 
   if (!meals) return null;
 

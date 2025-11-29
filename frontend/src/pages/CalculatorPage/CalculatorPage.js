@@ -10,10 +10,12 @@ function CalculatorPage() {
   const [showResults, setShowResults] = useState(false);
 
   const [apiData, setApiData] = useState(null);
+  const [resetTab, setResetTab] = useState(false);
 
   const handleGenerate = (data) => {
     setApiData(data);
     setShowResults(true);
+    setResetTab(true);
   };
 
   const toggleSidebar = () => {
@@ -37,7 +39,11 @@ function CalculatorPage() {
         <CalculatorForm onGenerate={handleGenerate} />
         {showResults && (
           <>
-            <RationSection meals={apiData.meals} />
+            <RationSection
+              meals={apiData.meals}
+              resetTab={resetTab}
+              onResetDone={() => setResetTab(false)}
+            />
             <StatisticSection stats={apiData.statistics} />
           </>
         )}
