@@ -31,6 +31,13 @@ function CalculatorForm({ onGenerate }) {
     calories: "",
   });
 
+  const [userMacros, setUserMacros] = useState({
+    protein: "",
+    fat: "",
+    carbs: "",
+    calories: "",
+  });
+
   const [errors, setErrors] = useState({});
   const [loadError, setLoadError] = useState(null);
 
@@ -89,6 +96,7 @@ function CalculatorForm({ onGenerate }) {
   const handleMacroChange = useCallback(
     (field, value) => {
       setMacros((prev) => ({ ...prev, [field]: value }));
+      setUserMacros((prev) => ({ ...prev, [field]: value }));
       if (errors[field]) {
         setErrors((prev) => ({ ...prev, [field]: null }));
       }
@@ -260,25 +268,25 @@ function CalculatorForm({ onGenerate }) {
         <div className={styles.inputList}>
           <NutrientInput
             label="Білки (г)"
-            value={macros.protein}
+            value={userMacros.protein}
             onChange={(v) => handleMacroChange("protein", v)}
             error={errors.protein}
           />
           <NutrientInput
             label="Жири (г)"
-            value={macros.fat}
+            value={userMacros.fat}
             onChange={(v) => handleMacroChange("fat", v)}
             error={errors.fat}
           />
           <NutrientInput
             label="Вуглеводи (г)"
-            value={macros.carbs}
+            value={userMacros.carbs}
             onChange={(v) => handleMacroChange("carbs", v)}
             error={errors.carbs}
           />
           <NutrientInput
             label="Калорії (ккал)"
-            value={macros.calories}
+            value={userMacros.calories}
             onChange={(v) => handleMacroChange("calories", v)}
             error={errors.calories}
           />
