@@ -12,10 +12,9 @@ const CALCULATE_API_URL = "http://127.0.0.1:8000/api/optimize-meal/";
 // "https://a11181f3-741e-47c2-affd-e0db7eeb352c.mock.pstmn.io/api/calculate-ration";
 
 const MIN_VALUES = {
-  protein: 40,
-  fat: 30,
-  carbs: 50,
-  calories: 200,
+  protein: 50,
+  fat: 50,
+  carbs: 130,
 };
 
 function CalculatorForm({ onGenerate }) {
@@ -106,20 +105,48 @@ function CalculatorForm({ onGenerate }) {
 
   const validate = useCallback(() => {
     const newErrors = {};
+    const { protein, fat, carbs, calories } = macros;
+    let isValid = true;
+
+    const p = Number(protein) || 0;
+    const f = Number(fat) || 0;
+    const c = Number(carbs) || 0;
+    const cal = Number(calories) || 0;
+
     if (!macros.protein || Number(macros.protein) < MIN_VALUES.protein) {
       newErrors.protein = `Мін. ${MIN_VALUES.protein}г`;
+      isValid = false;
     }
     if (!macros.fat || Number(macros.fat) < MIN_VALUES.fat) {
       newErrors.fat = `Мін. ${MIN_VALUES.fat}г`;
+      isValid = false;
     }
     if (!macros.carbs || Number(macros.carbs) < MIN_VALUES.carbs) {
       newErrors.carbs = `Мін. ${MIN_VALUES.carbs}г`;
+      isValid = false;
     }
     if (!macros.calories || Number(macros.calories) < MIN_VALUES.calories) {
       newErrors.calories = `Мін. ${MIN_VALUES.calories} ккал`;
+      isValid = false;
     }
+
+    const calculatedMinCaloriesRaw = p * 4 + f * 9 + c * 4;
+    const bufferPercent = 0.02;
+    const minBuffer = 10;
+    const buffer = Math.max(
+      minBuffer,
+      Math.ceil(calculatedMinCaloriesRaw * bufferPercent)
+    );
+    const calculatedMinCalories =
+      Math.ceil((calculatedMinCaloriesRaw + buffer) / 10) * 10;
+
+    if (cal < calculatedMinCalories) {
+      newErrors.calories = `Мінімально необхідні: ${calculatedMinCalories} ккал для ${p}Б/${f}Ж/${c}В`;
+      isValid = false;
+    }
+
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return isValid && Object.keys(newErrors).length === 0;
   }, [macros]);
 
   const handleSubmit = useCallback(async () => {
