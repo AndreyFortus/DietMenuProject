@@ -357,6 +357,8 @@ function CalculatorForm({ onGenerate }) {
 
               <span className={styles.selectedCount}>
                 Обрано: {selectedCount} страв
+                {selectedCount === 0 &&
+                  " — для генерації будуть використані всі доступні страви"}
               </span>
 
               {loadError && <div className={styles.errorText}>{loadError}</div>}
