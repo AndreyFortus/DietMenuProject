@@ -85,7 +85,8 @@ function RationSection({ meals, resetTab, onResetDone }) {
             ))
           ) : (
             <div className={styles.emptyMessage}>
-              Немає страв для цієї категорії
+              Неможливо згенерувати страви для цієї категорії. Спробуйте змінити
+              параметри або вибір страв.
             </div>
           )}
         </div>
