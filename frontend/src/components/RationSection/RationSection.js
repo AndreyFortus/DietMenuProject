@@ -8,15 +8,20 @@ import { ReactComponent as DinnerIcon } from "../../assets/dinner-icon.svg";
 import { ReactComponent as SliderLeft } from "../../assets/slider-left.svg";
 import { ReactComponent as SliderRight } from "../../assets/slider-right.svg";
 
-function RationSection({ meals }) {
+function RationSection({ meals, resetTab, onResetDone }) {
   const [activeTab, setActiveTab] = useState("breakfast");
   const listRef = useRef(null);
 
   useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTo({ left: 0, behavior: "auto" });
+    if (resetTab) {
+      setActiveTab("breakfast");
+
+      if (listRef.current) {
+        listRef.current.scrollTo({ left: 0, behavior: "auto" });
+      }
+      if (onResetDone) onResetDone();
     }
-  }, [activeTab]);
+  }, [resetTab, onResetDone]);
 
   if (!meals) return null;
 
@@ -59,13 +64,15 @@ function RationSection({ meals }) {
       </nav>
 
       <div className={styles.sliderWrapper}>
-        <button
-          className={`${styles.sliderBtn} ${styles.leftBtn}`}
-          onClick={() => scroll("left")}
-          disabled={currentList.length === 0}
-        >
-          <SliderLeft />
-        </button>
+        {currentList.length > 3 && (
+          <button
+            className={`${styles.sliderBtn} ${styles.leftBtn}`}
+            onClick={() => scroll("left")}
+            disabled={currentList.length === 0}
+          >
+            <SliderLeft />
+          </button>
+        )}
 
         <div className={styles.list} ref={listRef}>
           {currentList.length > 0 ? (
@@ -78,17 +85,20 @@ function RationSection({ meals }) {
             ))
           ) : (
             <div className={styles.emptyMessage}>
-              Немає страв для цієї категорії
+              Неможливо згенерувати страви для цієї категорії. Спробуйте змінити
+              параметри або вибір страв.
             </div>
           )}
         </div>
 
-        <button
-          className={`${styles.sliderBtn} ${styles.rightBtn}`}
-          onClick={() => scroll("right")}
-        >
-          <SliderRight />
-        </button>
+        {currentList.length > 3 && (
+          <button
+            className={`${styles.sliderBtn} ${styles.rightBtn}`}
+            onClick={() => scroll("right")}
+          >
+            <SliderRight />
+          </button>
+        )}
       </div>
     </div>
   );

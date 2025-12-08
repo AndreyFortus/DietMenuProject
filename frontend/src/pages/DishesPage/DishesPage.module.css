@@ -88,6 +88,10 @@
   font-size: 16px;
 }
 
+.searchBar:focus-within {
+  border-color: #4caf50;
+}
+
 .filterList {
   display: flex;
   flex-direction: row;

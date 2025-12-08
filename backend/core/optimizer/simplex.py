@@ -176,6 +176,10 @@ def optimize_meal(products, Pmin, Fmin, Hmin, Emax):
 
     status, x, Z = simplex_M_solve(A, b, costs, sense)
 
+    if status == 'infeasible':
+        b_relaxed = np.array([Pmin * 0.8, Fmin * 0.8, Hmin * 0.8, Emax * 1.1], dtype=float)
+        status, x, Z = simplex_M_solve(A, b_relaxed, costs, sense)
+
     if status != 'optimal':
         return {'status': status, 'items': [], 'totals': {}}
 

@@ -10,7 +10,8 @@ function DishesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [allDishes, setAllDishes] = useState([]);
   const [dishes, setDishes] = useState([]);
-  const [activeFilter, setActiveFilter] = useState("all");
+  // const [activeFilter, setActiveFilter] = useState("all");
+  const [activeFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -69,7 +70,8 @@ function DishesPage() {
 
         <div className={styles.searchBlock}>
           <div className={styles.filterHeader}>
-            <h3>Фільтри</h3>
+            {/* <h3>Фільтри</h3> */}
+            <h3>Пошук</h3>
             <p>Знайдіть потрібні продукти</p>
           </div>
           <div className={styles.searchBar}>
@@ -82,7 +84,7 @@ function DishesPage() {
             />
           </div>
 
-          <div className={styles.filterList}>
+          {/* <div className={styles.filterList}>
             <button
               className={
                 activeFilter === "all"
@@ -133,7 +135,7 @@ function DishesPage() {
             >
               Інше
             </button>
-          </div>
+          </div> */}
         </div>
 
         <span className={styles.count}>{dishes.length} dishes found</span>
