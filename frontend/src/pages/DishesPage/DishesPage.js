@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import styles from "./DishesPage.module.css";
-import Sidebar from "../../components/Sidebar/Sidebar";
+// import Sidebar from "../../components/Sidebar/Sidebar";
 import MealCard from "../../components/MealCard/MealCard";
 import { ReactComponent as SearchIcon } from "../../assets/search-icon.svg";
 
 const API_URL = "http://127.0.0.1:8000/api/products/";
 
 function DishesPage() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  // const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [allDishes, setAllDishes] = useState([]);
   const [dishes, setDishes] = useState([]);
   // const [activeFilter, setActiveFilter] = useState("all");
@@ -50,41 +50,41 @@ function DishesPage() {
     setDishes(filtered);
   }, [activeFilter, searchQuery, allDishes]);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  // const toggleSidebar = () => {
+  //   setIsSidebarOpen(!isSidebarOpen);
+  // };
 
-  const mainContentClass = isSidebarOpen
-    ? styles.mainContent
-    : `${styles.mainContent} ${styles.mainContentExpanded}`;
+  // const mainContentClass = isSidebarOpen
+  //   ? styles.mainContent
+  //   : `${styles.mainContent} ${styles.mainContentExpanded}`;
 
   return (
     <div className={styles.dishesPage}>
-      <Sidebar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
+      {/* <Sidebar isOpen={isSidebarOpen} onToggle={toggleSidebar} /> */}
 
-      <main className={mainContentClass}>
-        <div className={styles.header}>
-          <h1>База даних страв</h1>
-          <p>Переглядайте колекцію страв та продуктів</p>
+      {/* <main className={mainContentClass}> */}
+      <div className={styles.header}>
+        <h1>База даних страв</h1>
+        <p>Переглядайте колекцію страв та продуктів</p>
+      </div>
+
+      <div className={styles.searchBlock}>
+        <div className={styles.filterHeader}>
+          {/* <h3>Фільтри</h3> */}
+          <h3>Пошук</h3>
+          <p>Знайдіть потрібні продукти</p>
+        </div>
+        <div className={styles.searchBar}>
+          <SearchIcon />
+          <input
+            type="text"
+            placeholder="Шукайте страви або продукти"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
 
-        <div className={styles.searchBlock}>
-          <div className={styles.filterHeader}>
-            {/* <h3>Фільтри</h3> */}
-            <h3>Пошук</h3>
-            <p>Знайдіть потрібні продукти</p>
-          </div>
-          <div className={styles.searchBar}>
-            <SearchIcon />
-            <input
-              type="text"
-              placeholder="Шукайте страви або продукти"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          {/* <div className={styles.filterList}>
+        {/* <div className={styles.filterList}>
             <button
               className={
                 activeFilter === "all"
@@ -136,20 +136,20 @@ function DishesPage() {
               Інше
             </button>
           </div> */}
+      </div>
+
+      <span className={styles.count}>{dishes.length} dishes found</span>
+
+      {isLoading ? (
+        <p>Завантаження...</p>
+      ) : (
+        <div className={styles.dishesGrid}>
+          {dishes.map((meal) => (
+            <MealCard key={meal.id} data={meal} />
+          ))}
         </div>
-
-        <span className={styles.count}>{dishes.length} dishes found</span>
-
-        {isLoading ? (
-          <p>Завантаження...</p>
-        ) : (
-          <div className={styles.dishesGrid}>
-            {dishes.map((meal) => (
-              <MealCard key={meal.id} data={meal} />
-            ))}
-          </div>
-        )}
-      </main>
+      )}
+      {/* </main> */}
     </div>
   );
 }
