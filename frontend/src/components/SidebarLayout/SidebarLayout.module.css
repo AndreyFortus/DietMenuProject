@@ -1,0 +1,19 @@
+.page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.mainContent {
+  width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 40px;
+  margin: 0 auto;
+  transition: width 0.3s ease;
+}
+
+.mainContentExpanded {
+  width: 1368px;
+}
