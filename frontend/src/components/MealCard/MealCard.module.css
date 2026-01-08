@@ -24,6 +24,7 @@
   flex-direction: column;
   gap: 12px;
   padding: 0 16px 16px 16px;
+  flex-grow: 1;
 }
 
 .title {
@@ -48,6 +49,7 @@
   align-items: baseline;
   gap: 8px;
   font-family: "Inter", sans-serif;
+  margin-top: auto;
 }
 
 .price {
