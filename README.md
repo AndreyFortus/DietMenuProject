@@ -28,7 +28,7 @@ The project combines **mathematical optimization algorithms** with **modern web 
 
 The project consists of two main parts: **backend** and **frontend**.
 
-## 1️⃣ Run Backend (Docker — Recommended)
+## 1.️ Run Backend (Docker — Recommended)
 
 cd backend  
 docker-compose up --build -d
@@ -45,7 +45,7 @@ Swagger Docs: http://localhost:8000/api/docs/
 Admin Panel: http://localhost:8000/admin/  
 
 
-## 2️ Run Frontend (Local Development)
+## 2️. Run Frontend (Local Development)
 
 cd frontend  
 npm install  
