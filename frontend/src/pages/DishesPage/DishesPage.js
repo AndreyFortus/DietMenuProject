@@ -3,7 +3,7 @@ import styles from "./DishesPage.module.css";
 import MealCard from "../../components/MealCard/MealCard";
 import { ReactComponent as SearchIcon } from "../../assets/search-icon.svg";
 
-const API_URL = "http://127.0.0.1:8000/api/products/";
+const API_URL = "https://nutriplan-api-zxid.onrender.com/api/products/";
 
 function DishesPage() {
   const [allDishes, setAllDishes] = useState([]);

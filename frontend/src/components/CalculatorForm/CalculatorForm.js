@@ -7,9 +7,8 @@ import { ReactComponent as SearchIcon } from "../../assets/search-icon.svg";
 import { ReactComponent as SparkleIcon } from "../../assets/sparkle-icon.svg";
 import { ReactComponent as ChevronUpIcon } from "../../assets/chevron-up.svg";
 
-const PRODUCTS_API_URL = "http://127.0.0.1:8000/api/products/";
-const CALCULATE_API_URL = "http://127.0.0.1:8000/api/optimize-meal/";
-// "https://a11181f3-741e-47c2-affd-e0db7eeb352c.mock.pstmn.io/api/calculate-ration";
+const PRODUCTS_API_URL = "https://nutriplan-api-zxid.onrender.com/api/products/";
+const CALCULATE_API_URL = "https://nutriplan-api-zxid.onrender.com/api/optimize-meal/";
 
 const MIN_VALUES = {
   protein: 50,

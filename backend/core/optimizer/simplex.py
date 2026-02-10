@@ -145,7 +145,13 @@ def build_products_from_queryset(qs):
             price = float(d.price or 0)
             description = getattr(d, 'description', '')
             img = getattr(d, 'image', None)
-            image_url = f'http://127.0.0.1:8000{img.url}' if img else ''
+            if img:
+                if img.url.startswith('http'):
+                    image_url = img.url
+                else:
+                    image_url = f'http://127.0.0.1:8000{img.url}'
+            else:
+                image_url = ''
         else:
             title = d.get('title')
             protein = float(d.get('protein', 0))
