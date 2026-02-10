@@ -82,11 +82,13 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 #     }
 # }
 
-LOCAL_DB_URL = (f'postgres://{os.getenv('DB_USER')}:'
-                f'{os.getenv('DB_PASSWORD')}@'
-                f'{os.getenv('DB_HOST')}:'
-                f'{os.getenv('DB_PORT')}/'
-                f'{os.getenv('DB_NAME')}')
+LOCAL_DB_URL = (
+    f"postgres://{os.getenv('DB_USER')}:"
+    f"{os.getenv('DB_PASSWORD')}@"
+    f"{os.getenv('DB_HOST')}:"
+    f"{os.getenv('DB_PORT')}/"
+    f"{os.getenv('DB_NAME')}"
+)
 
 DATABASES = {
     'default': dj_database_url.config(

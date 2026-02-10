@@ -250,4 +250,4 @@ class Command(BaseCommand):
 
             dish.save()
 
-        self.stdout.write(self.style.SUCCESS(f'--- БД оновлено ---'))
+        self.stdout.write(self.style.SUCCESS('--- БД оновлено ---'))
