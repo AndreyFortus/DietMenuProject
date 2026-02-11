@@ -7,8 +7,10 @@ import { ReactComponent as SearchIcon } from "../../assets/search-icon.svg";
 import { ReactComponent as SparkleIcon } from "../../assets/sparkle-icon.svg";
 import { ReactComponent as ChevronUpIcon } from "../../assets/chevron-up.svg";
 
-const PRODUCTS_API_URL = "https://nutriplan-api-zxid.onrender.com/api/products/";
-const CALCULATE_API_URL = "https://nutriplan-api-zxid.onrender.com/api/optimize-meal/";
+const BASE_URL = process.env.REACT_APP_API_URL;
+
+const PRODUCTS_API_URL = `${BASE_URL}/products/`;
+const CALCULATE_API_URL = `${BASE_URL}/optimize-meal/`;
 
 const MIN_VALUES = {
   protein: 50,
