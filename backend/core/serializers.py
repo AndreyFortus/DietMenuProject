@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Dish, DishIngredient, Ingredient
+from .models import Dish, DishIngredient, Ingredient, FridgeItem, Ingredient
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -9,11 +9,12 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class DishIngredientSerializer(serializers.ModelSerializer):
-    ingredient = IngredientSerializer(read_only=True)
+    ingredient_id = serializers.ReadOnlyField(source='ingredient.id')
+    ingredient_name = serializers.ReadOnlyField(source='ingredient.name')
 
     class Meta:
         model = DishIngredient
-        fields = ['ingredient', 'weight_g']
+        fields = ['ingredient_id', 'ingredient_name', 'weight_g']
 
 
 class DishSerializer(serializers.ModelSerializer):
@@ -34,3 +35,12 @@ class MealOptimizeSerializer(serializers.Serializer):
     fat = serializers.FloatField(min_value=0, required=True)
     carbs = serializers.FloatField(min_value=0, required=True)
     calories = serializers.FloatField(min_value=0, required=True)
+
+
+class FridgeItemSerializer(serializers.ModelSerializer):
+    ingredient_name = serializers.CharField(source='ingredient.name', read_only=True)
+
+    class Meta:
+        model = FridgeItem
+        fields = ['id', 'ingredient', 'ingredient_name', 'weight_g']
+        read_only_fields = ['id', 'ingredient_name']
