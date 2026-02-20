@@ -1,10 +1,8 @@
 import React from "react";
-import { useOutletContext } from "react-router-dom";
 import Fridge from "../../components/Fridge/Fridge";
 import styles from "./FridgePage.module.css";
 
 const FridgePage = () => {
-  const { user } = useOutletContext();
   return (
     <div className={styles.pageContainer}>
       <header className={styles.pageHeader}>
