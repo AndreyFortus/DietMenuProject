@@ -1,0 +1,139 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.userNameText {
+  font-size: 0.6em;
+  color: #777;
+}
+
+.addForm {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border: 1px solid #e9ecef;
+}
+
+.iconPlus {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.formRow {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.select {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #333333;
+  background-color: #ffffff;
+}
+
+.select option {
+  color: #333333;
+  background-color: #ffffff;
+}
+
+.input {
+  width: 100px;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #333333;
+}
+
+.addButton {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.addButton:hover {
+  background-color: #218838;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: white;
+  border-bottom: 1px solid #eee;
+  transition: background 0.2s;
+}
+
+.item:hover {
+  background: #fafafa;
+}
+
+.itemText {
+  font-size: 16px;
+  color: #333;
+}
+
+.deleteBtn {
+  background: transparent;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deleteBtn:hover {
+  background: #dc3545;
+  color: white;
+}
+
+.loading,
+.emptyState {
+  text-align: center;
+  color: #888;
+  margin-top: 40px;
+  font-size: 18px;
+}
+
+.emptyStateContainer {
+  text-align: center;
+  color: #888;
+  margin-top: 40px;
+  font-size: 18px;
+}
+
+.emptyStateIcon {
+  margin-bottom: 10px;
+}
