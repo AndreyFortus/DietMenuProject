@@ -1,4 +1,8 @@
+import os
+
+from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.core.files import File
 from core.models import Dish, Ingredient, DishIngredient
 
 
@@ -165,19 +169,27 @@ class Command(BaseCommand):
         ]
 
         for dish_data in dishes_data:
-            filename = dish_data['image'].split('/')[-1]
-            final_path = f'images/{filename}'
-
-            Dish.objects.update_or_create(
+            dish, created = Dish.objects.update_or_create(
                 id=dish_data['id'],
                 defaults={
                     'title': dish_data['title'],
                     'description': dish_data['description'],
                     'price': dish_data['price'],
-                    'image': final_path,
-                    'meal_type': dish_data['meal_type']
+                    'meal_type': dish_data['meal_type'],
                 }
             )
+
+            filename = dish_data['image'].split('/')[-1]
+
+            local_path = os.path.join(settings.BASE_DIR, 'media', 'images', filename)
+
+            if os.path.exists(local_path):
+                self.stdout.write(f'Loading: {filename}...')
+
+                with open(local_path, 'rb') as f:
+                    dish.image.save(filename, File(f), save=True)
+            else:
+                self.stdout.write(self.style.WARNING(f'File not found locally: {local_path}'))
 
         recipes = {
             # --- СНІДАНКИ ---
@@ -223,6 +235,8 @@ class Command(BaseCommand):
             29: [('Кабачок', 70), ('Печериці', 70), ('Болгарський перець', 60), ('Оливкова олія', 10)],
             30: [('Куряче філе', 140), ('Спаржа', 100), ('Оливкова олія', 5)],
         }
+
+        DishIngredient.objects.all().delete()
 
         count_links = 0
         for dish_id, ingredients_list in recipes.items():

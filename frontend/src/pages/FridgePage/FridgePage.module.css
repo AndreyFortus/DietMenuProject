@@ -1,0 +1,20 @@
+.pageContainer {
+  padding: 0;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.pageHeader {
+  margin-bottom: 30px;
+}
+
+.pageHeader h1 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 16px;
+}

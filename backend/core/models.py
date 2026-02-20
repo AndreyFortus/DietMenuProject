@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -90,3 +91,15 @@ class DishIngredient(models.Model):
         dish = self.dish
         super().delete(*args, **kwargs)
         dish.calculate_nutrition()
+
+
+class FridgeItem(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='fridge_items')
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    weight_g = models.IntegerField(verbose_name='Вага (г)', default=0)
+
+    class Meta:
+        unique_together = ('user', 'ingredient')
+
+    def __str__(self):
+        return f'{self.user.username} - {self.ingredient.name} ({self.weight_g}г)'
