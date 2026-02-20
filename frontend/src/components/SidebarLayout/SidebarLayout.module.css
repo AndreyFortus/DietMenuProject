@@ -5,15 +5,11 @@
 }
 
 .mainContent {
-  width: 1200px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
   display: flex;
   flex-direction: column;
   gap: 22px;
-  padding: 40px;
-  margin: 0 auto;
-  transition: width 0.3s ease;
-}
-
-.mainContentExpanded {
-  width: 1368px;
 }

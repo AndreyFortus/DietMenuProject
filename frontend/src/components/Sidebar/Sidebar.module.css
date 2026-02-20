@@ -41,7 +41,9 @@
   flex-direction: column;
   padding: 16px 18px;
   gap: 8px;
-  transition: padding 0.3s ease, gap 0.3s ease;
+  transition:
+    padding 0.3s ease,
+    gap 0.3s ease;
 }
 
 .navLink,
@@ -55,13 +57,18 @@
   font-family: "Inter", sans-serif;
   font-weight: 500;
   font-size: 16px;
-  transition: color 0.2s, background-color 0.2s;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
 }
 
 .navLink {
   color: #344256;
   background-color: transparent;
-  transition: color 0.2s, background-color 0.2s, padding 0.3s ease,
+  transition:
+    color 0.2s,
+    background-color 0.2s,
+    padding 0.3s ease,
     gap 0.3s ease;
 }
 .navLink:hover {
@@ -70,12 +77,17 @@
 
 .activeLink {
   color: #4caf50;
-  transition: color 0.2s, background-color 0.2s, padding 0.3s ease,
+  transition:
+    color 0.2s,
+    background-color 0.2s,
+    padding 0.3s ease,
     gap 0.3s ease;
 }
 
 .bottomSection {
   border-top: 1px solid #e8e8e8;
+  display: flex;
+  flex-direction: column;
 }
 
 .toggleButton {
@@ -143,4 +155,109 @@
   padding-left: 12px;
   padding-right: 12px;
   gap: 0;
+}
+
+.userBlock {
+  padding: 8px 12px;
+  margin-bottom: 4px;
+}
+
+.loggedInState {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.avatar,
+.avatarPlaceholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid #e5e7eb;
+  display: block;
+}
+
+.avatarPlaceholder {
+  background: #4caf50;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+}
+
+.userName {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+.userEmail {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.logoutBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px;
+  opacity: 0.6;
+}
+.logoutBtn:hover {
+  opacity: 1;
+}
+
+.loginBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #333;
+}
+
+.googleIcon {
+  font-weight: 900;
+  color: #db4437;
+  font-size: 18px;
+}
+
+.closed .userInfo,
+.closed .loginText,
+.closed .logoutBtn {
+  display: none;
+}
+
+.closed .loggedInState {
+  justify-content: center;
+}
+
+.closed .loginBtn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
 }
