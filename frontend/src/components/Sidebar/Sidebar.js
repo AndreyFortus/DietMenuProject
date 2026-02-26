@@ -72,7 +72,7 @@ function Sidebar({ isOpen, onToggle, user, onLogin, onLogout }) {
                 {user.picture ? (
                   <img
                     src={user.picture}
-                    alt="Profile Picture"
+                    alt="Ava"
                     className={styles.avatar}
                     referrerPolicy="no-referrer"
                   />
