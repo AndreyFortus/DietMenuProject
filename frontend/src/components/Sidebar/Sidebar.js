@@ -8,24 +8,27 @@ import { ReactComponent as RationIcon } from "../../assets/ration-icon.svg";
 import { ReactComponent as DishesIcon } from "../../assets/dishes-icon.svg";
 import { ReactComponent as ThemeIcon } from "../../assets/theme-icon.svg";
 import { ReactComponent as FridgeIcon } from "../../assets/fridge-icon.svg";
+import { ReactComponent as GoogleIcon } from "../../assets/google-logo.svg";
+
+const NAV_ITEMS = [
+  { to: "/calculator", icon: <RationIcon />, label: "Раціон" },
+  { to: "/dishes", icon: <DishesIcon />, label: "Страви" },
+  { to: "/fridge", icon: <FridgeIcon />, label: "Холодильник" },
+];
 
 function Sidebar({ isOpen, onToggle, user, onLogin, onLogout }) {
   const login = useGoogleLogin({
     scope: "email profile openid",
-    onSuccess: async (tokenResponse) => {
+    onSuccess: async (token) => {
       try {
         const userInfo = await fetch(
           "https://www.googleapis.com/oauth2/v3/userinfo",
           {
-            headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+            headers: { Authorization: `Bearer ${token.access_token}` },
           },
         ).then((res) => res.json());
 
-        const loginData = {
-          access_token: tokenResponse.access_token,
-          ...userInfo,
-        };
-        onLogin(loginData);
+        onLogin({ access_token: token.access_token, ...userInfo });
       } catch (error) {
         console.error("Login Error:", error);
       }
@@ -33,14 +36,7 @@ function Sidebar({ isOpen, onToggle, user, onLogin, onLogout }) {
     onError: (error) => console.log("Login Failed:", error),
   });
 
-  const sidebarClass = isOpen
-    ? styles.sidebar
-    : `${styles.sidebar} ${styles.closed}`;
-
-  const getInitial = () => {
-    if (user?.name) return user.name[0].toUpperCase();
-    return "U";
-  };
+  const sidebarClass = `${styles.sidebar} ${!isOpen ? styles.closed : ""}`;
 
   return (
     <aside className={sidebarClass}>
@@ -53,35 +49,18 @@ function Sidebar({ isOpen, onToggle, user, onLogin, onLogout }) {
         </div>
 
         <nav className={styles.nav}>
-          <NavLink
-            to="/calculator"
-            className={({ isActive }) =>
-              isActive ? styles.activeLink : styles.navLink
-            }
-          >
-            <RationIcon />
-            <span>Раціон</span>
-          </NavLink>
-
-          <NavLink
-            to="/dishes"
-            className={({ isActive }) =>
-              isActive ? styles.activeLink : styles.navLink
-            }
-          >
-            <DishesIcon />
-            <span>Страви</span>
-          </NavLink>
-
-          <NavLink
-            to="/fridge"
-            className={({ isActive }) =>
-              isActive ? styles.activeLink : styles.navLink
-            }
-          >
-            <FridgeIcon />
-            <span>Холодильник</span>
-          </NavLink>
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                isActive ? styles.activeLink : styles.navLink
+              }
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
         </nav>
       </div>
 
@@ -93,12 +72,14 @@ function Sidebar({ isOpen, onToggle, user, onLogin, onLogout }) {
                 {user.picture ? (
                   <img
                     src={user.picture}
-                    alt="Ava"
+                    alt="Profile Picture"
                     className={styles.avatar}
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className={styles.avatarPlaceholder}>{getInitial()}</div>
+                  <div className={styles.avatarPlaceholder}>
+                    {user.name?.[0].toUpperCase() || "U"}
+                  </div>
                 )}
               </div>
 
@@ -118,11 +99,16 @@ function Sidebar({ isOpen, onToggle, user, onLogin, onLogout }) {
           ) : (
             <button
               onClick={() => login()}
-              className={styles.loginBtn}
+              className={styles.gsiMaterialButton}
               title="Увійти через Google"
             >
-              <span className={styles.googleIcon}>G</span>
-              <span className={styles.loginText}>Увійти</span>
+              <div className={styles.gsiMaterialButtonState} />
+              <div className={styles.gsiMaterialButtonContentWrapper}>
+                <div className={styles.gsiMaterialButtonIcon}>
+                  <GoogleIcon />
+                </div>
+                <span className={styles.loginText}>Увійти</span>
+              </div>
             </button>
           )}
         </div>
