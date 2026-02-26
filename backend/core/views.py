@@ -1,6 +1,7 @@
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
+from django.db.models import F
 from drf_spectacular.openapi import AutoSchema
 from rest_framework import generics, viewsets, permissions
 from .models import Dish, FridgeItem, Ingredient
@@ -116,6 +117,27 @@ class FridgeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return FridgeItem.objects.filter(user=self.request.user).order_by('-id')
+
+    def create(self, request, *args, **kwargs):
+        ingredient_id = request.data.get('ingredient')
+        try:
+            weight_to_add = int(request.data.get('weight_g'))
+        except (ValueError, TypeError):
+            weight_to_add = 0
+
+        item = FridgeItem.objects.filter(
+            user=self.request.user,
+            ingredient_id=ingredient_id
+        ).first()
+
+        if item:
+            item.weight_g += weight_to_add
+            item.save()
+
+            serializer = self.get_serializer(item)
+            return Response(serializer.data, status=200)
+
+        return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
