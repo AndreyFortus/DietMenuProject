@@ -9,6 +9,7 @@ import { ReactComponent as DishesIcon } from "../../assets/dishes-icon.svg";
 import { ReactComponent as ThemeIcon } from "../../assets/theme-icon.svg";
 import { ReactComponent as FridgeIcon } from "../../assets/fridge-icon.svg";
 import { ReactComponent as GoogleIcon } from "../../assets/google-logo.svg";
+import { ReactComponent as LogoutIcon } from "../../assets/logout-icon.svg";
 
 const NAV_ITEMS = [
   { to: "/calculator", icon: <RationIcon />, label: "Раціон" },
@@ -93,7 +94,7 @@ function Sidebar({ isOpen, onToggle, user, onLogin, onLogout }) {
                 className={styles.logoutBtn}
                 title="Вийти"
               >
-                x
+                <LogoutIcon />
               </button>
             </div>
           ) : (
