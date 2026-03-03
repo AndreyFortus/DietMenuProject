@@ -84,7 +84,7 @@ const Fridge = () => {
   const customStyles = {
     control: (provided, state) => ({
       ...provided,
-      minHeight: "47px",
+      minHeight: "45px",
       borderRadius: "8px",
       borderColor: state.isFocused ? "#4caf50" : "#d1d5db",
       boxShadow: "none",
