@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import styles from "./CalculatorForm.module.css";
 import Button from "../Button/Button";
 import NutrientInput from "../NutrientInput/NutrientInput";
+import ShoppingList from "../ShoppingList/ShoppingList";
 
 import { calculateShoppingList } from "../../utils/shoppingLogic";
 import api from "../../api";
@@ -22,7 +23,7 @@ const MIN_VALUES = {
 };
 
 function CalculatorForm({ onGenerate }) {
-  const [isProductsOpen, setIsProductsOpen] = useState(true);
+  const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -436,134 +437,26 @@ function CalculatorForm({ onGenerate }) {
         </div>
       </div>
       {result && (
-        <div
-          style={{
-            marginTop: "40px",
-            paddingTop: "20px",
-            borderTop: "1px solid #eaeaea",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <div onClick={handleShowShoppingList}>
-              <Button
-                variant="secondary"
-                disabled={isShoppingListLoading}
-                iconBefore={<span>🛒</span>}
-              >
-                {isShoppingListLoading
-                  ? "Аналізуємо холодильник..."
-                  : "Сформувати список покупок"}
-              </Button>
-            </div>
-          </div>
-
-          {shoppingList && (
-            <div
-              style={{
-                marginTop: "20px",
-                overflowX: "auto",
-                background: "#fff",
-                padding: "15px",
-                borderRadius: "12px",
-                border: "1px solid #eee",
-              }}
-            >
-              <h3 style={{ marginBottom: "15px", color: "#2d3748" }}>
-                Ваш список покупок:
-              </h3>
-
-              {shoppingList.length === 0 ? (
-                <div
-                  style={{
-                    padding: "15px",
-                    background: "#e6fffa",
-                    color: "#2c7a7b",
-                    borderRadius: "8px",
-                    textAlign: "center",
-                  }}
+        <div className={styles.resultSection}>
+          {!shoppingList ? (
+            <div className={styles.shoppingListButtonWrapper}>
+              <div onClick={handleShowShoppingList}>
+                <Button
+                  variant="secondary"
+                  disabled={isShoppingListLoading}
+                  iconBefore={<span>🛒</span>}
                 >
-                  🎉 Чудово! У вас вдома є всі необхідні продукти.
-                </div>
-              ) : (
-                <table
-                  style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    fontSize: "15px",
-                  }}
-                >
-                  <thead>
-                    <tr
-                      style={{
-                        background: "#f7fafc",
-                        textAlign: "left",
-                        borderBottom: "2px solid #edf2f7",
-                      }}
-                    >
-                      <th style={{ padding: "12px", color: "#4a5568" }}>
-                        Продукт
-                      </th>
-                      <th style={{ padding: "12px", color: "#4a5568" }}>
-                        Треба всього
-                      </th>
-                      <th style={{ padding: "12px", color: "#4a5568" }}>
-                        Є вдома
-                      </th>
-                      <th style={{ padding: "12px", color: "#e53e3e" }}>
-                        Купити
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {shoppingList.map((item, idx) => (
-                      <tr
-                        key={idx}
-                        style={{ borderBottom: "1px solid #edf2f7" }}
-                      >
-                        <td
-                          style={{
-                            padding: "12px",
-                            fontWeight: "600",
-                            color: "#2d3748",
-                          }}
-                        >
-                          {item.name}
-                        </td>
-                        <td style={{ padding: "12px" }}>{item.needed} г</td>
-                        <td style={{ padding: "12px", color: "#718096" }}>
-                          {item.have} г
-                        </td>
-                        <td
-                          style={{
-                            padding: "12px",
-                            fontWeight: "bold",
-                            color: "#e53e3e",
-                          }}
-                        >
-                          {item.toBuy} г
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-
-              <div style={{ marginTop: "15px", textAlign: "center" }}>
-                <button
-                  onClick={() => setShoppingList(null)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#718096",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    fontSize: "14px",
-                  }}
-                >
-                  Приховати список
-                </button>
+                  {isShoppingListLoading
+                    ? "Аналізуємо холодильник..."
+                    : "Сформувати список покупок"}
+                </Button>
               </div>
             </div>
+          ) : (
+            <ShoppingList
+              list={shoppingList}
+              onClose={() => setShoppingList(null)}
+            />
           )}
         </div>
       )}
