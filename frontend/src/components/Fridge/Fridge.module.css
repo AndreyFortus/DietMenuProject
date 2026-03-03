@@ -106,7 +106,7 @@
   font-family: "Inter", sans-serif;
   cursor: pointer;
   transition: background-color 0.2s;
-  height: 47px;
+  height: 45px;
 }
 
 .addButton:hover {
