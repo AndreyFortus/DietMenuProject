@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./ShoppingList.module.css";
 
-function ShoppingList({ list, onClose }) {
+function ShoppingList({ list, onClose, onCook, isDeducting }) {
   if (!list) return null;
 
   return (
@@ -35,7 +35,15 @@ function ShoppingList({ list, onClose }) {
         </table>
       )}
 
-      <div className={styles.closeButtonContainer}>
+      <div className={styles.actionsContainer}>
+        <button
+          className={styles.cookButton}
+          onClick={onCook}
+          disabled={isDeducting}
+        >
+          {isDeducting ? "Списання..." : "🍳 Приготувати (списати продукти)"}
+        </button>
+
         <button onClick={onClose} className={styles.closeButton}>
           Приховати список
         </button>

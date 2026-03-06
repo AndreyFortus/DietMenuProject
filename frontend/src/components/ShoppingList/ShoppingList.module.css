@@ -104,6 +104,42 @@
 .shoppingListButtonWrapper {
   display: flex;
   justify-content: center;
+  gap: 16px;
   width: 100%;
   margin-bottom: 24px;
+}
+
+.actionsContainer {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.cookButton {
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cookButton:hover:not(:disabled) {
+  background-color: #d97706;
+  transform: translateY(-1px);
+}
+
+.cookButton:disabled {
+  background-color: #fcd34d;
+  cursor: not-allowed;
 }

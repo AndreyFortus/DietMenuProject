@@ -30,6 +30,7 @@ function CalculatorForm({ onGenerate }) {
   const [result, setResult] = useState(null);
   const [shoppingList, setShoppingList] = useState(null);
   const [isShoppingListLoading, setIsShoppingListLoading] = useState(false);
+  const [isDeducting, setIsDeducting] = useState(false);
 
   const [macros, setMacros] = useState({
     protein: "",
@@ -302,10 +303,96 @@ function CalculatorForm({ onGenerate }) {
       const list = calculateShoppingList(result, fridgeRes.data);
       setShoppingList(list);
     } catch (error) {
-      console.error("Помилка:", error);
       alert("Не вдалося завантажити холодильник. Можливо, ви не авторизовані.");
     } finally {
       setIsShoppingListLoading(false);
+    }
+  };
+
+  const handleCookMeal = async () => {
+    if (!result) return;
+
+    if (
+      !window.confirm("Списати використані продукти з вашого холодильника?")
+    ) {
+      return;
+    }
+
+    setIsDeducting(true);
+    try {
+      const fridgeRes = await api.get("fridge/");
+      const currentFridge = fridgeRes.data;
+      const requirements = {};
+
+      ["breakfast", "lunch", "dinner"].forEach((mealType) => {
+        const meal = result[mealType];
+
+        if (meal && meal.items) {
+          meal.items.forEach((dish) => {
+            if (!dish.ingredients || dish.ingredients.length === 0) return;
+
+            const standardDishWeight = dish.ingredients.reduce(
+              (sum, ing) => sum + (ing.weight_g || 0),
+              0,
+            );
+            const targetWeight = dish.grams || standardDishWeight;
+
+            let ratio = 1;
+            if (standardDishWeight > 0 && targetWeight > 0) {
+              ratio = targetWeight / standardDishWeight;
+            }
+
+            dish.ingredients.forEach((ing) => {
+              const id = ing.ingredient_id;
+              if (!requirements[id]) {
+                requirements[id] = {
+                  id: id,
+                  name: ing.ingredient_name,
+                  totalNeeded: 0,
+                };
+              }
+              requirements[id].totalNeeded += (ing.weight_g || 0) * ratio;
+            });
+          });
+        }
+      });
+
+      const operations = [];
+
+      Object.values(requirements).forEach((req) => {
+        const fridgeItem = currentFridge.find(
+          (item) => item.ingredient === req.id,
+        );
+
+        if (fridgeItem) {
+          const remainder = fridgeItem.weight_g - req.totalNeeded;
+
+          if (remainder <= 0) {
+            operations.push(api.delete(`fridge/${fridgeItem.id}/`));
+          } else {
+            operations.push(
+              api.patch(`fridge/${fridgeItem.id}/`, {
+                weight_g: Math.round(remainder),
+              }),
+            );
+          }
+        }
+      });
+
+      if (operations.length > 0) {
+        await Promise.all(operations);
+        alert("✅ Смачного! Продукти успішно списані з холодильника.");
+        setShoppingList(null);
+      } else {
+        alert(
+          "У холодильнику не знайдено жодного продукту з цього раціону для списання.",
+        );
+      }
+    } catch (error) {
+      console.error("Помилка списання:", error);
+      alert("❌ Не вдалося списати продукти.");
+    } finally {
+      setIsDeducting(false);
     }
   };
 
@@ -456,6 +543,8 @@ function CalculatorForm({ onGenerate }) {
             <ShoppingList
               list={shoppingList}
               onClose={() => setShoppingList(null)}
+              onCook={handleCookMeal}
+              isDeducting={isDeducting}
             />
           )}
         </div>
