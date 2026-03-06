@@ -18,6 +18,7 @@ postgres_data/
 # Frontend (React)
 frontend/node_modules/
 frontend/build/
+frontend/.env
 .DS_Store
 
 # IDE
