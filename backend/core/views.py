@@ -1,7 +1,6 @@
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
-from django.db.models import F
 from drf_spectacular.openapi import AutoSchema
 from rest_framework import generics, viewsets, permissions
 from .models import Dish, FridgeItem, Ingredient

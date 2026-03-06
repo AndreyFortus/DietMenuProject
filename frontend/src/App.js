@@ -37,6 +37,10 @@ function App() {
       const backendToken = res.data.access || res.data.key;
       localStorage.setItem("nutri_token", backendToken);
 
+      if (res.data.refresh) {
+        localStorage.setItem("nutri_refresh_token", res.data.refresh);
+      }
+
       const finalUser = {
         ...res.data.user,
         name: googleUser.name,
