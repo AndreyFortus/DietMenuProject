@@ -11,6 +11,8 @@ const Fridge = () => {
   const [loading, setLoading] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const [weight, setWeight] = useState(100);
+  const [editingItemId, setEditingItemId] = useState(null);
+  const [editWeight, setEditWeight] = useState("");
 
   const fetchData = async () => {
     setLoading(true);
@@ -52,6 +54,27 @@ const Fridge = () => {
     }
   };
 
+  const handleSaveEdit = async (id) => {
+    try {
+      await api.patch(`fridge/${id}/`, {
+        weight_g: parseInt(editWeight, 10),
+      });
+
+      setMyItems((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? { ...item, weight_g: parseInt(editWeight, 10) }
+            : item,
+        ),
+      );
+
+      setEditingItemId(null);
+    } catch (error) {
+      console.error("Помилка редагування:", error);
+      alert("Не вдалося оновити вагу. Перевірте підключення.");
+    }
+  };
+
   const handleDelete = async (id) => {
     try {
       await api.delete(`fridge/${id}/`);
@@ -80,53 +103,6 @@ const Fridge = () => {
     value: ing.id,
     label: ing.name,
   }));
-
-  const customStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      minHeight: "45px",
-      borderRadius: "8px",
-      borderColor: state.isFocused ? "#4caf50" : "#d1d5db",
-      boxShadow: "none",
-      "&:hover": {
-        borderColor: state.isFocused ? "#4caf50" : "#d1d5db",
-      },
-      fontFamily: '"Inter", sans-serif',
-      fontSize: "16px",
-      backgroundColor: "#ffffff",
-      cursor: "pointer",
-    }),
-    option: (provided, state) => ({
-      ...provided,
-      fontFamily: '"Inter", sans-serif',
-      fontSize: "16px",
-      backgroundColor: state.isSelected
-        ? "#4caf50"
-        : state.isFocused
-          ? "rgba(76, 175, 80, 0.1)"
-          : "white",
-      color: state.isSelected ? "white" : "#1f2937",
-      cursor: "pointer",
-      "&:active": {
-        backgroundColor: "#43a047",
-      },
-    }),
-    placeholder: (provided) => ({
-      ...provided,
-      color: "#757575",
-    }),
-    singleValue: (provided) => ({
-      ...provided,
-      color: "#757575",
-    }),
-    menu: (provided) => ({
-      ...provided,
-      borderRadius: "8px",
-      boxShadow:
-        "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-      zIndex: 10,
-    }),
-  };
 
   return (
     <div className={styles.container}>
@@ -161,9 +137,15 @@ const Fridge = () => {
             <input
               type="number"
               value={weight}
-              onChange={(e) => setWeight(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val.length <= 5) {
+                  setWeight(val);
+                }
+              }}
               className={styles.input}
               min="1"
+              max="99999"
             />
           </div>
 
@@ -193,15 +175,66 @@ const Fridge = () => {
                   <span className={styles.itemName}>
                     {item.ingredient_name || "Продукт"}
                   </span>
-                  <span className={styles.itemWeight}>{item.weight_g} г</span>
+
+                  {editingItemId !== item.id && (
+                    <span className={styles.itemWeight}>{item.weight_g} г</span>
+                  )}
                 </div>
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  className={styles.deleteBtn}
-                  title="Видалити"
-                >
-                  ✕
-                </button>
+
+                <div className={styles.actionsWrapper}>
+                  {editingItemId === item.id ? (
+                    <>
+                      <input
+                        type="number"
+                        className={styles.editInput}
+                        value={editWeight}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val.length <= 5) {
+                            setEditWeight(val);
+                          }
+                        }}
+                        min="1"
+                        max="99999"
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => handleSaveEdit(item.id)}
+                        className={styles.saveBtn}
+                        title="Зберегти"
+                      >
+                        ✓
+                      </button>
+                      <button
+                        onClick={() => setEditingItemId(null)}
+                        className={styles.cancelBtn}
+                        title="Скасувати"
+                      >
+                        ✕
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          setEditingItemId(item.id);
+                          setEditWeight(item.weight_g);
+                        }}
+                        className={styles.editBtn}
+                        title="Редагувати вагу"
+                      >
+                        ✎
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className={styles.deleteBtn}
+                        title="Видалити"
+                      >
+                        ✕
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -209,6 +242,53 @@ const Fridge = () => {
       </div>
     </div>
   );
+};
+
+const customStyles = {
+  control: (provided, state) => ({
+    ...provided,
+    minHeight: "45px",
+    borderRadius: "8px",
+    borderColor: state.isFocused ? "#4caf50" : "#d1d5db",
+    boxShadow: "none",
+    "&:hover": {
+      borderColor: state.isFocused ? "#4caf50" : "#d1d5db",
+    },
+    fontFamily: '"Inter", sans-serif',
+    fontSize: "16px",
+    backgroundColor: "#ffffff",
+    cursor: "pointer",
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    fontFamily: '"Inter", sans-serif',
+    fontSize: "16px",
+    backgroundColor: state.isSelected
+      ? "#4caf50"
+      : state.isFocused
+        ? "rgba(76, 175, 80, 0.1)"
+        : "white",
+    color: state.isSelected ? "white" : "#1f2937",
+    cursor: "pointer",
+    "&:active": {
+      backgroundColor: "#43a047",
+    },
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: "#757575",
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#757575",
+  }),
+  menu: (provided) => ({
+    ...provided,
+    borderRadius: "8px",
+    boxShadow:
+      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+    zIndex: 10,
+  }),
 };
 
 export default Fridge;

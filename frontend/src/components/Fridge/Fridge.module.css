@@ -145,6 +145,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
@@ -159,12 +160,16 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
+  min-width: 0;
 }
 
 .itemName {
   font-weight: 600;
   color: #1f2937;
   font-size: 16px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .itemWeight {
@@ -211,4 +216,73 @@
 
 .emptyState p {
   color: #6b7280;
+}
+
+.actionsWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.editBtn,
+.saveBtn,
+.cancelBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+  flex-shrink: 0;
+}
+
+.editBtn {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+.editBtn:hover {
+  background-color: #bae6fd;
+  transform: scale(1.05);
+}
+
+.saveBtn {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+.saveBtn:hover {
+  background-color: #bbf7d0;
+  transform: scale(1.05);
+}
+
+.cancelBtn {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+.cancelBtn:hover {
+  background-color: #e5e7eb;
+  transform: scale(1.05);
+}
+
+.editInput {
+  width: 45px;
+  padding: 4px 8px;
+  border: 1px solid #4caf50;
+  border-radius: 6px;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  outline: none;
+  text-align: center;
+}
+
+.editInput::-webkit-outer-spin-button,
+.editInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
