@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import Select from "react-select";
 import api from "../../api";
+import { ReactComponent as SortIcon } from "../../assets/sort-icon.svg";
 import styles from "./Fridge.module.css";
 
 const Fridge = () => {
@@ -13,6 +14,7 @@ const Fridge = () => {
   const [weight, setWeight] = useState(100);
   const [editingItemId, setEditingItemId] = useState(null);
   const [editWeight, setEditWeight] = useState("");
+  const [sortType, setSortType] = useState("default");
 
   const fetchData = async () => {
     setLoading(true);
@@ -104,6 +106,26 @@ const Fridge = () => {
     label: ing.name,
   }));
 
+  const sortedItems = [...myItems].sort((a, b) => {
+    const nameA = a.ingredient_name || "";
+    const nameB = b.ingredient_name || "";
+    const weightA = a.weight_g || 0;
+    const weightB = b.weight_g || 0;
+
+    switch (sortType) {
+      case "name_asc":
+        return nameA.localeCompare(nameB);
+      case "name_desc":
+        return nameB.localeCompare(nameA);
+      case "weight_desc":
+        return weightB - weightA;
+      case "weight_asc":
+        return weightA - weightB;
+      default:
+        return 0;
+    }
+  });
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -156,9 +178,37 @@ const Fridge = () => {
       </div>
 
       <div className={styles.inventorySection}>
-        <h3 className={styles.sectionTitle}>
-          Наявні інгредієнти ({myItems.length})
-        </h3>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "16px",
+          }}
+        >
+          <h3 className={styles.sectionTitle} style={{ margin: 0 }}>
+            Наявні інгредієнти ({myItems.length})
+          </h3>
+
+          {myItems.length > 0 && (
+            <div className={styles.sortContainer}>
+              <SortIcon className={styles.sortIcon} />
+
+              <select
+                value={sortType}
+                onChange={(e) => setSortType(e.target.value)}
+                className={styles.sortSelect}
+              >
+                <option value="default">За часом додавання</option>
+                <option value="name_asc">За назвою (А-Я)</option>
+                <option value="name_desc">За назвою (Я-А)</option>
+                <option value="weight_desc">За вагою (від найбільшої)</option>
+                <option value="weight_asc">За вагою (від найменшої)</option>
+              </select>
+            </div>
+          )}
+        </div>
+
         {loading && myItems.length === 0 ? (
           <p>Оновлення...</p>
         ) : myItems.length === 0 ? (
@@ -169,7 +219,7 @@ const Fridge = () => {
           </div>
         ) : (
           <div className={styles.grid}>
-            {myItems.map((item) => (
+            {sortedItems.map((item) => (
               <div key={item.id} className={styles.itemCard}>
                 <div className={styles.itemInfo}>
                   <span className={styles.itemName}>
