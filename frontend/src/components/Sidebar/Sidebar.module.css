@@ -5,7 +5,6 @@
   height: 100vh;
   position: sticky;
   top: 0;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -41,7 +40,9 @@
   flex-direction: column;
   padding: 16px 18px;
   gap: 8px;
-  transition: padding 0.3s ease, gap 0.3s ease;
+  transition:
+    padding 0.3s ease,
+    gap 0.3s ease;
 }
 
 .navLink,
@@ -55,27 +56,30 @@
   font-family: "Inter", sans-serif;
   font-weight: 500;
   font-size: 16px;
-  transition: color 0.2s, background-color 0.2s;
+  transition:
+    color 0.2s,
+    background-color 0.2s,
+    padding 0.3s ease,
+    gap 0.3s ease;
 }
 
 .navLink {
   color: #344256;
   background-color: transparent;
-  transition: color 0.2s, background-color 0.2s, padding 0.3s ease,
-    gap 0.3s ease;
 }
+
 .navLink:hover {
   background-color: #f5f5f5;
 }
 
 .activeLink {
   color: #4caf50;
-  transition: color 0.2s, background-color 0.2s, padding 0.3s ease,
-    gap 0.3s ease;
 }
 
 .bottomSection {
   border-top: 1px solid #e8e8e8;
+  display: flex;
+  flex-direction: column;
 }
 
 .toggleButton {
@@ -98,11 +102,150 @@
 .toggleButton:hover {
   background-color: #f5f5f5;
 }
+
 .toggleButton svg {
   display: block;
   width: 36px;
   height: 36px;
   transition: transform 0.3s ease;
+}
+
+/* === СТИЛІ ЮЗЕРА ТА ЛОГІНУ === */
+.userBlock {
+  padding: 8px 12px;
+  margin-bottom: 4px;
+}
+
+.loggedInState {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.avatar,
+.avatarPlaceholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid #e5e7eb;
+  display: block;
+}
+
+.avatarPlaceholder {
+  background: #4caf50;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+}
+
+.userName {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+.userEmail {
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.logoutBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  color: #6b7280;
+  transition:
+    color 0.2s,
+    transform 0.2s;
+}
+
+.logoutBtn:hover {
+  color: #ef4444;
+  transform: scale(1.1);
+}
+
+.logoutBtn svg {
+  width: 16px;
+  height: 16px;
+  transform: rotate(180deg);
+}
+
+.gsiMaterialButton {
+  background-color: WHITE;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-sizing: border-box;
+  color: #1f1f1f;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  height: 40px;
+  width: 100%;
+  outline: none;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+  text-align: center;
+  transition:
+    background-color 0.218s,
+    box-shadow 0.218s;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.gsiMaterialButtonContentWrapper {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
+  gap: 12px;
+}
+
+.gsiMaterialButtonIcon {
+  height: 20px;
+  min-width: 20px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.gsiMaterialButtonState {
+  transition: opacity 0.218s;
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.gsiMaterialButton:not(:disabled):hover {
+  box-shadow:
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 1px 3px 1px rgba(60, 64, 67, 0.15);
+  background-color: #f8f9fa;
 }
 
 .closed {
@@ -112,25 +255,20 @@
 .closed .logo span,
 .closed .navLink span,
 .closed .activeLink span,
-.closed .toggleButton span {
+.closed .toggleButton span,
+.closed .userInfo,
+.closed .loginText,
+.closed .logoutBtn {
   display: none;
 }
 
-.closed .upBar {
-  justify-content: center;
-}
-
+.closed .upBar,
 .closed .navLink,
-.closed .activeLink {
+.closed .activeLink,
+.closed .toggleButton,
+.closed .loggedInState,
+.closed .userBlock {
   justify-content: center;
-}
-
-.closed .toggleButton {
-  justify-content: center;
-}
-
-.closed .toggleButton svg {
-  transform: rotate(180deg);
 }
 
 .closed .nav {
@@ -143,4 +281,28 @@
   padding-left: 12px;
   padding-right: 12px;
   gap: 0;
+}
+
+.closed .userBlock {
+  padding-left: 0;
+  padding-right: 0;
+  display: flex;
+}
+
+.closed .toggleButton svg {
+  transform: rotate(180deg);
+}
+
+.closed .gsiMaterialButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.closed .gsiMaterialButtonContentWrapper {
+  gap: 0;
+}
+
+.closed .gsiMaterialButtonIcon {
+  margin: 0;
 }
