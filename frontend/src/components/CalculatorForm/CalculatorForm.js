@@ -2,6 +2,10 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import styles from "./CalculatorForm.module.css";
 import Button from "../Button/Button";
 import NutrientInput from "../NutrientInput/NutrientInput";
+import ShoppingList from "../ShoppingList/ShoppingList";
+
+import { calculateShoppingList } from "../../utils/shoppingLogic";
+import api from "../../api";
 
 import { ReactComponent as SearchIcon } from "../../assets/search-icon.svg";
 import { ReactComponent as SparkleIcon } from "../../assets/sparkle-icon.svg";
@@ -19,10 +23,14 @@ const MIN_VALUES = {
 };
 
 function CalculatorForm({ onGenerate }) {
-  const [isProductsOpen, setIsProductsOpen] = useState(true);
+  const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [shoppingList, setShoppingList] = useState(null);
+  const [isShoppingListLoading, setIsShoppingListLoading] = useState(false);
+  const [isDeducting, setIsDeducting] = useState(false);
 
   const [macros, setMacros] = useState({
     protein: "",
@@ -85,7 +93,7 @@ function CalculatorForm({ onGenerate }) {
 
   const handleCheckboxChange = useCallback((id) => {
     setAllProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, checked: !p.checked } : p))
+      prev.map((p) => (p.id === id ? { ...p, checked: !p.checked } : p)),
     );
   }, []);
 
@@ -101,7 +109,7 @@ function CalculatorForm({ onGenerate }) {
         setErrors((prev) => ({ ...prev, [field]: null }));
       }
     },
-    [errors]
+    [errors],
   );
 
   const validate = useCallback(() => {
@@ -136,7 +144,7 @@ function CalculatorForm({ onGenerate }) {
     const minBuffer = 10;
     const buffer = Math.max(
       minBuffer,
-      Math.ceil(calculatedMinCaloriesRaw * bufferPercent)
+      Math.ceil(calculatedMinCaloriesRaw * bufferPercent),
     );
     const calculatedMinCalories =
       Math.ceil((calculatedMinCaloriesRaw + buffer) / 10) * 10;
@@ -167,6 +175,8 @@ function CalculatorForm({ onGenerate }) {
     console.log("Sending data to backend:", requestData);
 
     setIsLoading(true);
+    setShoppingList(null);
+
     try {
       const res = await fetch(CALCULATE_API_URL, {
         method: "POST",
@@ -179,6 +189,8 @@ function CalculatorForm({ onGenerate }) {
       }
       const data = await res.json();
       console.log("Received response:", data);
+
+      setResult(data);
 
       const formatMealItems = (items) => {
         if (!items || !Array.isArray(items)) {
@@ -263,7 +275,7 @@ function CalculatorForm({ onGenerate }) {
 
   const selectedCount = useMemo(
     () => allProducts.filter((p) => p.checked).length,
-    [allProducts]
+    [allProducts],
   );
 
   const renderColumn = (col) => {
@@ -280,6 +292,108 @@ function CalculatorForm({ onGenerate }) {
         <span className={styles.productTitle}>{product.title}</span>
       </label>
     ));
+  };
+
+  const handleShowShoppingList = async () => {
+    if (!result) return;
+
+    setIsShoppingListLoading(true);
+    try {
+      const fridgeRes = await api.get("fridge/");
+      const list = calculateShoppingList(result, fridgeRes.data);
+      setShoppingList(list);
+    } catch (error) {
+      alert("Не вдалося завантажити холодильник. Можливо, ви не авторизовані.");
+    } finally {
+      setIsShoppingListLoading(false);
+    }
+  };
+
+  const handleCookMeal = async () => {
+    if (!result) return;
+
+    if (
+      !window.confirm("Списати використані продукти з вашого холодильника?")
+    ) {
+      return;
+    }
+
+    setIsDeducting(true);
+    try {
+      const fridgeRes = await api.get("fridge/");
+      const currentFridge = fridgeRes.data;
+      const requirements = {};
+
+      ["breakfast", "lunch", "dinner"].forEach((mealType) => {
+        const meal = result[mealType];
+
+        if (meal && meal.items) {
+          meal.items.forEach((dish) => {
+            if (!dish.ingredients || dish.ingredients.length === 0) return;
+
+            const standardDishWeight = dish.ingredients.reduce(
+              (sum, ing) => sum + (ing.weight_g || 0),
+              0,
+            );
+            const targetWeight = dish.grams || standardDishWeight;
+
+            let ratio = 1;
+            if (standardDishWeight > 0 && targetWeight > 0) {
+              ratio = targetWeight / standardDishWeight;
+            }
+
+            dish.ingredients.forEach((ing) => {
+              const id = ing.ingredient_id;
+              if (!requirements[id]) {
+                requirements[id] = {
+                  id: id,
+                  name: ing.ingredient_name,
+                  totalNeeded: 0,
+                };
+              }
+              requirements[id].totalNeeded += (ing.weight_g || 0) * ratio;
+            });
+          });
+        }
+      });
+
+      const operations = [];
+
+      Object.values(requirements).forEach((req) => {
+        const fridgeItem = currentFridge.find(
+          (item) => item.ingredient === req.id,
+        );
+
+        if (fridgeItem) {
+          const remainder = fridgeItem.weight_g - req.totalNeeded;
+
+          if (remainder <= 0) {
+            operations.push(api.delete(`fridge/${fridgeItem.id}/`));
+          } else {
+            operations.push(
+              api.patch(`fridge/${fridgeItem.id}/`, {
+                weight_g: Math.round(remainder),
+              }),
+            );
+          }
+        }
+      });
+
+      if (operations.length > 0) {
+        await Promise.all(operations);
+        alert("✅ Смачного! Продукти успішно списані з холодильника.");
+        setShoppingList(null);
+      } else {
+        alert(
+          "У холодильнику не знайдено жодного продукту з цього раціону для списання.",
+        );
+      }
+    } catch (error) {
+      console.error("Помилка списання:", error);
+      alert("❌ Не вдалося списати продукти.");
+    } finally {
+      setIsDeducting(false);
+    }
   };
 
   return (
@@ -409,6 +523,32 @@ function CalculatorForm({ onGenerate }) {
           </Button>
         </div>
       </div>
+      {result && (
+        <div className={styles.resultSection}>
+          {!shoppingList ? (
+            <div className={styles.shoppingListButtonWrapper}>
+              <div onClick={handleShowShoppingList}>
+                <Button
+                  variant="secondary"
+                  disabled={isShoppingListLoading}
+                  iconBefore={<span>🛒</span>}
+                >
+                  {isShoppingListLoading
+                    ? "Аналізуємо холодильник..."
+                    : "Сформувати список покупок"}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <ShoppingList
+              list={shoppingList}
+              onClose={() => setShoppingList(null)}
+              onCook={handleCookMeal}
+              isDeducting={isDeducting}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

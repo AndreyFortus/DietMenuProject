@@ -137,6 +137,7 @@ def build_products_from_queryset(qs):
     products = []
     for d in qs:
         if hasattr(d, 'protein'):
+            id_val = d.id
             title = d.title
             protein = float(d.protein or 0)
             fat = float(d.fat or 0)
@@ -153,6 +154,7 @@ def build_products_from_queryset(qs):
             else:
                 image_url = ''
         else:
+            id_val = d.get('id')
             title = d.get('title')
             protein = float(d.get('protein', 0))
             fat = float(d.get('fat', 0))
@@ -161,7 +163,7 @@ def build_products_from_queryset(qs):
             price = float(d.get('price', 0))
             description = d.get('description', '')
             image_url = d.get('image', '')
-        products.append((title, protein, fat, carbs, calories, price, description, image_url))
+        products.append((id_val, title, protein, fat, carbs, calories, price, description, image_url))
     return products
 
 
@@ -170,11 +172,11 @@ def optimize_meal(products, Pmin, Fmin, Hmin, Emax):
     if len(product_list) == 0:
         return {'status': 'empty_products', 'items': [], 'totals': {}}
 
-    proteins = np.array([p[1] / 100.0 for p in product_list])
-    fats = np.array([p[2] / 100.0 for p in product_list])
-    carbs = np.array([p[3] / 100.0 for p in product_list])
-    kcals = np.array([p[4] / 100.0 for p in product_list])
-    costs = np.array([p[5] / 100.0 for p in product_list])
+    proteins = np.array([p[2] / 100.0 for p in product_list])
+    fats = np.array([p[3] / 100.0 for p in product_list])
+    carbs = np.array([p[4] / 100.0 for p in product_list])
+    kcals = np.array([p[5] / 100.0 for p in product_list])
+    costs = np.array([p[6] / 100.0 for p in product_list])
 
     A = np.vstack([proteins, fats, carbs, kcals])
     b = np.array([Pmin, Fmin, Hmin, Emax], dtype=float)
@@ -194,7 +196,7 @@ def optimize_meal(products, Pmin, Fmin, Hmin, Emax):
 
     for j, qty in enumerate(x):
         if qty > 1e-6:
-            title, _, _, _, _, _, description, image_url = product_list[j]
+            id_val, title, _, _, _, _, _, description, image_url = product_list[j]
             grams = float(qty)
             cost = float(costs[j] * grams)
             prot = proteins[j] * grams
@@ -203,6 +205,7 @@ def optimize_meal(products, Pmin, Fmin, Hmin, Emax):
             kcal = kcals[j] * grams
 
             items.append({
+                'id': id_val,
                 'name': title,
                 'grams': round(grams, 2),
                 'cost': round(cost, 2),

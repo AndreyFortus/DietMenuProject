@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Dish, Ingredient, DishIngredient
+from .models import Dish, Ingredient, DishIngredient, FridgeItem
 
 
 class DishIngredientInline(admin.TabularInline):
@@ -13,3 +13,10 @@ class DishAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Ingredient)
+
+
+@admin.register(FridgeItem)
+class FridgeItemAdmin(admin.ModelAdmin):
+    list_display = ('user', 'ingredient', 'weight_g')
+    list_filter = ('user',)
+    search_fields = ('ingredient__name', 'user__username')
