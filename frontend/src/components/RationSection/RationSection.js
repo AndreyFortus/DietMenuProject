@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./RationSection.module.css";
 import MealCard from "../MealCard/MealCard";
+import ReplaceDish from "../ReplaceDish/ReplaceDish";
 
 import { ReactComponent as BreakfastIcon } from "../../assets/breakfast-icon.svg";
 import { ReactComponent as LunchIcon } from "../../assets/lunch-icon.svg";
@@ -8,7 +9,7 @@ import { ReactComponent as DinnerIcon } from "../../assets/dinner-icon.svg";
 import { ReactComponent as SliderLeft } from "../../assets/slider-left.svg";
 import { ReactComponent as SliderRight } from "../../assets/slider-right.svg";
 
-function RationSection({ meals, resetTab, onResetDone }) {
+function RationSection({ meals, resetTab, onResetDone, onMealReplaced }) {
   const [activeTab, setActiveTab] = useState("breakfast");
   const listRef = useRef(null);
 
@@ -77,11 +78,20 @@ function RationSection({ meals, resetTab, onResetDone }) {
         <div className={styles.list} ref={listRef}>
           {currentList.length > 0 ? (
             currentList.map((meal) => (
-              <MealCard
-                key={meal.id}
-                data={meal}
-                className={styles.sliderCard}
-              />
+              <div key={meal.id} className={styles.mealCardWrapper}>
+                <MealCard data={meal} className={styles.sliderCard} />
+
+                <ReplaceDish
+                  dishId={meal.id}
+                  grams={meal.weight}
+                  mealType={activeTab}
+                  onReplaceSuccess={(oldId, newDish) => {
+                    if (onMealReplaced) {
+                      onMealReplaced(activeTab, oldId, newDish);
+                    }
+                  }}
+                />
+              </div>
             ))
           ) : (
             <div className={styles.emptyMessage}>

@@ -103,3 +103,14 @@
   font-size: 16px;
   color: #6b7280;
 }
+
+.mealCardWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+  flex: 1 1 0%;
+  min-width: 368px;
+  width: auto;
+  max-width: 100%;
+}

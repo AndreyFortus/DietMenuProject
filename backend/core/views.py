@@ -214,15 +214,16 @@ class ReplaceDishAPIView(APIView):
 
         response_data = {
             'id': best_dish.id,
-            'name': best_dish.title,
-            'grams': round(best_grams, 1),
+            'image': best_dish.image.url if getattr(best_dish, 'image', None) else None,
+            'title': best_dish.title,
+            'description': best_dish.description,
+            'price': round(new_total_cost, 2),
+            'portion': f"(~ {round(new_total_cost)} ₴ порція)",
+            'weight': round(best_grams, 1),
             'calories': round(target_calories, 1),
             'protein': round(new_total_protein, 1),
             'fat': round(new_total_fat, 1),
             'carbs': round(new_total_carbs, 1),
-            'cost': round(new_total_cost, 2),
-            'image': best_dish.image.url if getattr(best_dish, 'image', None) else None,
-            'description': best_dish.description
         }
 
         return Response(response_data, status=200)

@@ -199,7 +199,7 @@ function CalculatorForm({ onGenerate }) {
 
         return items.map((item, index) => ({
           id: item.id || `${Date.now()}-${index}`,
-          title: item.name,
+          title: item.title,
           description: item.description || "",
           image: item.image || "",
           price: item.cost ? item.cost.toFixed(2) : "0.00",
