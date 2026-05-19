@@ -44,3 +44,11 @@ class FridgeItemSerializer(serializers.ModelSerializer):
         model = FridgeItem
         fields = ['id', 'ingredient', 'ingredient_name', 'weight_g']
         read_only_fields = ['id', 'ingredient_name']
+
+
+class ReplaceDishRequestSerializer(serializers.Serializer):
+    dish_id = serializers.IntegerField()
+    grams = serializers.FloatField()
+    meal_type = serializers.ChoiceField(
+        choices=['breakfast', 'lunch', 'dinner'],
+    )

@@ -1,10 +1,16 @@
+import math
+
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 from drf_spectacular.openapi import AutoSchema
+from drf_spectacular.utils import extend_schema
 from rest_framework import generics, viewsets, permissions
+from rest_framework.views import APIView
+
 from .models import Dish, FridgeItem, Ingredient
-from .serializers import DishSerializer, MealOptimizeSerializer, FridgeItemSerializer, IngredientSerializer
+from .serializers import DishSerializer, MealOptimizeSerializer, FridgeItemSerializer, IngredientSerializer, \
+    ReplaceDishRequestSerializer
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from .optimizer.simplex import optimize_meal
@@ -140,3 +146,83 @@ class FridgeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class ReplaceDishAPIView(APIView):
+
+    @extend_schema(
+        request=ReplaceDishRequestSerializer,
+        description='Dish replacement'
+    )
+    def post(self, request):
+        serializer = ReplaceDishRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        data = serializer.validated_data
+        old_dish_id = data['dish_id']
+        current_grams = data['grams']
+        meal_type = data['meal_type']
+
+        try:
+            old_dish = Dish.objects.get(id=old_dish_id)
+        except Dish.DoesNotExist:
+            return Response({'error': 'Dish not found'}, status=404)
+
+        candidates = Dish.objects.filter(meal_type=meal_type).exclude(id=old_dish_id)
+
+        if not candidates.exists():
+            return Response({'error': 'No alternatives for this dish'}, status=400)
+
+        target_calories = (float(old_dish.calories) / 100) * float(current_grams)
+        target_p = (float(old_dish.protein) / 100) * float(current_grams)
+        target_f = (float(old_dish.fat) / 100) * float(current_grams)
+        target_c = (float(old_dish.carbs) / 100) * float(current_grams)
+
+        best_dish = None
+        min_distance = float('inf')
+        best_grams = 0
+
+        for dish in candidates:
+            if float(dish.calories) == 0:
+                continue
+
+            cand_grams = (target_calories / float(dish.calories)) * 100
+
+            cand_p = (float(dish.protein) / 100) * cand_grams
+            cand_f = (float(dish.fat) / 100) * cand_grams
+            cand_c = (float(dish.carbs) / 100) * cand_grams
+
+            dp = ((target_p - cand_p) * 4) ** 2
+            df = ((target_f - cand_f) * 9) ** 2
+            dc = ((target_c - cand_c) * 4) ** 2
+
+            dist = math.sqrt(dp + df + dc)
+
+            if dist < min_distance:
+                min_distance = dist
+                best_dish = dish
+                best_grams = cand_grams
+
+        if not best_dish:
+            return Response({'error': 'Cannot find a dish replacement'}, status=400)
+
+        new_total_protein = (float(best_dish.protein) / 100) * best_grams
+        new_total_fat = (float(best_dish.fat) / 100) * best_grams
+        new_total_carbs = (float(best_dish.carbs) / 100) * best_grams
+        new_total_cost = (float(getattr(best_dish, 'price', 0)) / 100) * best_grams
+
+        response_data = {
+            'id': best_dish.id,
+            'name': best_dish.title,
+            'grams': round(best_grams, 1),
+            'calories': round(target_calories, 1),
+            'protein': round(new_total_protein, 1),
+            'fat': round(new_total_fat, 1),
+            'carbs': round(new_total_carbs, 1),
+            'cost': round(new_total_cost, 2),
+            'image': best_dish.image.url if getattr(best_dish, 'image', None) else None,
+            'description': best_dish.description
+        }
+
+        return Response(response_data, status=200)
