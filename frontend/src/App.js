@@ -11,20 +11,52 @@ import DishesPage from "./pages/DishesPage/DishesPage";
 import FridgePage from "./pages/FridgePage/FridgePage";
 import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
 
+const isTokenExpired = (token) => {
+  if (!token) return true;
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const expirationTime = payload.exp * 1000;
+    return Date.now() >= expirationTime;
+  } catch (error) {
+    console.error("JWT error:", error);
+    return true;
+  }
+};
+
 function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem("user_info");
-      const token = localStorage.getItem("nutri_token");
+    const checkAuthStatus = () => {
+      try {
+        const savedUser = localStorage.getItem("user_info");
+        const token = localStorage.getItem("nutri_token");
 
-      if (savedUser && token) {
-        setUser(JSON.parse(savedUser));
+        if (token && isTokenExpired(token)) {
+          localStorage.clear();
+          setUser(null);
+          return;
+        }
+
+        if (savedUser && token) {
+          setUser(JSON.parse(savedUser));
+        }
+      } catch (e) {
+        localStorage.clear();
       }
-    } catch (e) {
-      localStorage.clear();
-    }
+    };
+
+    checkAuthStatus();
+
+    const handleForceLogout = () => {
+      setUser(null);
+    };
+    window.addEventListener("auth-expired", handleForceLogout);
+
+    return () => {
+      window.removeEventListener("auth-expired", handleForceLogout);
+    };
   }, []);
 
   const handleLogin = async (googleData) => {
@@ -51,7 +83,7 @@ function App() {
       localStorage.setItem("user_info", JSON.stringify(finalUser));
       setUser(finalUser);
     } catch (error) {
-      console.error("Помилка входу:", error);
+      console.error("Login error:", error);
     }
   };
 
