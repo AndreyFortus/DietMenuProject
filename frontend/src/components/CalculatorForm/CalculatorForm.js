@@ -22,15 +22,17 @@ const MIN_VALUES = {
   carbs: 130,
 };
 
-function CalculatorForm({ onGenerate }) {
+function CalculatorForm({ onGenerate, currentMenuData }) {
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [shoppingList, setShoppingList] = useState(null);
+  // const [shoppingList, setShoppingList] = useState(null);
+  const [isShoppingListOpen, setIsShoppingListOpen] = useState(false);
   const [isShoppingListLoading, setIsShoppingListLoading] = useState(false);
   const [isDeducting, setIsDeducting] = useState(false);
+  const [currentFridge, setCurrentFridge] = useState([]);
 
   const [macros, setMacros] = useState({
     protein: "",
@@ -45,6 +47,8 @@ function CalculatorForm({ onGenerate }) {
     carbs: "",
     calories: "",
   });
+
+  const [daysCount, setDaysCount] = useState(1);
 
   const [errors, setErrors] = useState({});
   const [loadError, setLoadError] = useState(null);
@@ -170,12 +174,12 @@ function CalculatorForm({ onGenerate }) {
         calories: Number(macros.calories),
       },
       selected_products: selectedProducts,
+      days: Number(daysCount),
     };
 
     console.log("Sending data to backend:", requestData);
 
     setIsLoading(true);
-    setShoppingList(null);
 
     try {
       const res = await fetch(CALCULATE_API_URL, {
@@ -199,7 +203,7 @@ function CalculatorForm({ onGenerate }) {
 
         return items.map((item, index) => ({
           id: item.id || `${Date.now()}-${index}`,
-          title: item.title,
+          title: item.title || item.name || "",
           description: item.description || "",
           image: item.image || "",
           price: item.cost ? item.cost.toFixed(2) : "0.00",
@@ -209,56 +213,24 @@ function CalculatorForm({ onGenerate }) {
           protein: item.protein ? item.protein.toFixed(0) : "0",
           fat: item.fat ? item.fat.toFixed(0) : "0",
           carbs: item.carbs ? item.carbs.toFixed(0) : "0",
+          grams: item.grams || item.weight || 0,
+          ingredients: item.ingredients || [],
         }));
       };
 
-      const formattedMeals = {
-        breakfast: formatMealItems(data.breakfast?.items),
-        lunch: formatMealItems(data.lunch?.items),
-        dinner: formatMealItems(data.dinner?.items),
-      };
-
-      const getTotal = (mealData, field) => {
-        return mealData?.totals?.[field] || 0;
-      };
-
-      const totalStats = {
-        price:
-          getTotal(data.breakfast, "price") +
-          getTotal(data.lunch, "price") +
-          getTotal(data.dinner, "price"),
-        calories:
-          getTotal(data.breakfast, "calories") +
-          getTotal(data.lunch, "calories") +
-          getTotal(data.dinner, "calories"),
-        protein:
-          getTotal(data.breakfast, "protein") +
-          getTotal(data.lunch, "protein") +
-          getTotal(data.dinner, "protein"),
-        fat:
-          getTotal(data.breakfast, "fat") +
-          getTotal(data.lunch, "fat") +
-          getTotal(data.dinner, "fat"),
-        carbs:
-          getTotal(data.breakfast, "carbs") +
-          getTotal(data.lunch, "carbs") +
-          getTotal(data.dinner, "carbs"),
-      };
+      const formattedDays = data.days.map((day) => ({
+        day_number: day.day_number,
+        meals: {
+          breakfast: formatMealItems(day.meals?.breakfast?.items),
+          lunch: formatMealItems(day.meals?.lunch?.items),
+          dinner: formatMealItems(day.meals?.dinner?.items),
+        },
+        statistics: day.statistics,
+      }));
 
       const formattedData = {
-        meals: formattedMeals,
-        statistics: {
-          totalCost: totalStats.price.toFixed(2),
-          totalCalories: totalStats.calories.toFixed(0),
-          macros: {
-            protein: `${totalStats.protein.toFixed(0)}г`,
-            fat: `${totalStats.fat.toFixed(0)}г`,
-            carbs: `${totalStats.carbs.toFixed(0)}г`,
-          },
-        },
+        days: formattedDays,
       };
-
-      setIsProductsOpen(true);
 
       if (onGenerate) onGenerate(formattedData);
     } catch (err) {
@@ -267,7 +239,7 @@ function CalculatorForm({ onGenerate }) {
     } finally {
       setIsLoading(false);
     }
-  }, [macros, allProducts, validate, onGenerate]);
+  }, [macros, allProducts, validate, onGenerate, daysCount]);
 
   const contentClassName = isProductsOpen
     ? styles.productsContent
@@ -295,22 +267,22 @@ function CalculatorForm({ onGenerate }) {
   };
 
   const handleShowShoppingList = async () => {
-    if (!result) return;
-
     setIsShoppingListLoading(true);
     try {
       const fridgeRes = await api.get("fridge/");
-      const list = calculateShoppingList(result, fridgeRes.data);
-      setShoppingList(list);
+      setCurrentFridge(fridgeRes.data);
+      setIsShoppingListOpen(true);
     } catch (error) {
-      alert("Не вдалося завантажити холодильник. Можливо, ви не авторизовані.");
+      console.error("Помилка завантаження холодильника:", error);
     } finally {
       setIsShoppingListLoading(false);
     }
   };
 
   const handleCookMeal = async () => {
-    if (!result) return;
+    const actualData = currentMenuData || result;
+
+    if (!actualData || !actualData.days) return;
 
     if (
       !window.confirm("Списати використані продукти з вашого холодильника?")
@@ -324,18 +296,27 @@ function CalculatorForm({ onGenerate }) {
       const currentFridge = fridgeRes.data;
       const requirements = {};
 
-      ["breakfast", "lunch", "dinner"].forEach((mealType) => {
-        const meal = result[mealType];
+      actualData.days.forEach((day) => {
+        const meals = day.meals;
 
-        if (meal && meal.items) {
-          meal.items.forEach((dish) => {
+        ["breakfast", "lunch", "dinner"].forEach((mealType) => {
+          let itemsArray = [];
+          if (Array.isArray(meals[mealType])) {
+            itemsArray = meals[mealType];
+          } else if (meals[mealType] && meals[mealType].items) {
+            itemsArray = meals[mealType].items;
+          }
+
+          itemsArray.forEach((dish) => {
             if (!dish.ingredients || dish.ingredients.length === 0) return;
 
             const standardDishWeight = dish.ingredients.reduce(
               (sum, ing) => sum + (ing.weight_g || 0),
               0,
             );
-            const targetWeight = dish.grams || standardDishWeight;
+
+            const targetWeight =
+              Number(dish.weight) || Number(dish.grams) || standardDishWeight;
 
             let ratio = 1;
             if (standardDishWeight > 0 && targetWeight > 0) {
@@ -354,7 +335,7 @@ function CalculatorForm({ onGenerate }) {
               requirements[id].totalNeeded += (ing.weight_g || 0) * ratio;
             });
           });
-        }
+        });
       });
 
       const operations = [];
@@ -382,7 +363,6 @@ function CalculatorForm({ onGenerate }) {
       if (operations.length > 0) {
         await Promise.all(operations);
         alert("✅ Смачного! Продукти успішно списані з холодильника.");
-        setShoppingList(null);
       } else {
         alert(
           "У холодильнику не знайдено жодного продукту з цього раціону для списання.",
@@ -395,6 +375,13 @@ function CalculatorForm({ onGenerate }) {
       setIsDeducting(false);
     }
   };
+
+  const shoppingList = useMemo(() => {
+    if (!isShoppingListOpen) return null;
+
+    const actualMenuData = currentMenuData || result;
+    return calculateShoppingList(actualMenuData, currentFridge);
+  }, [currentMenuData, result, currentFridge, isShoppingListOpen]);
 
   return (
     <div className={styles.calculatorForm} aria-busy={isLoading}>
@@ -432,6 +419,23 @@ function CalculatorForm({ onGenerate }) {
             onChange={(v) => handleMacroChange("calories", v)}
             error={errors.calories}
           />
+        </div>
+
+        <div className={styles.daysWrapper}>
+          <label className={styles.daysLabel}>Тривалість раціону:</label>
+          <select
+            className={styles.daysSelect}
+            value={daysCount}
+            onChange={(e) => setDaysCount(e.target.value)}
+          >
+            <option value="1">1 день</option>
+            <option value="2">2 дні</option>
+            <option value="3">3 дні</option>
+            <option value="4">4 дні</option>
+            <option value="5">5 днів</option>
+            <option value="6">6 днів</option>
+            <option value="7">1 тиждень</option>
+          </select>
         </div>
       </div>
 
@@ -523,9 +527,9 @@ function CalculatorForm({ onGenerate }) {
           </Button>
         </div>
       </div>
-      {result && (
+      {(currentMenuData || result) && (
         <div className={styles.resultSection}>
-          {!shoppingList ? (
+          {!isShoppingListOpen ? (
             <div className={styles.shoppingListButtonWrapper}>
               <div onClick={handleShowShoppingList}>
                 <Button
@@ -542,7 +546,7 @@ function CalculatorForm({ onGenerate }) {
           ) : (
             <ShoppingList
               list={shoppingList}
-              onClose={() => setShoppingList(null)}
+              onClose={() => setIsShoppingListOpen(false)}
               onCook={handleCookMeal}
               isDeducting={isDeducting}
             />

@@ -206,7 +206,9 @@
   display: grid;
   grid-template-rows: 1fr;
   overflow: hidden;
-  transition: grid-template-rows 0.3s ease-out, margin-top 0.3s ease-out;
+  transition:
+    grid-template-rows 0.3s ease-out,
+    margin-top 0.3s ease-out;
   margin-top: 24px;
 }
 
@@ -220,4 +222,38 @@
 .productsContentClosed {
   grid-template-rows: 0fr;
   margin-top: 0;
+}
+
+.daysWrapper {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.daysLabel {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #475569;
+}
+
+.daysSelect {
+  padding: 8px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  color: #1e293b;
+  background-color: #ffffff;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.daysSelect:focus {
+  border-color: #4caf50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
 }

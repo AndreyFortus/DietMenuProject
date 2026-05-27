@@ -3,28 +3,36 @@ import styles from "./CalculatorPage.module.css";
 import CalculatorForm from "../../components/CalculatorForm/CalculatorForm";
 import RationSection from "../../components/RationSection/RationSection";
 import StatisticSection from "../../components/StatisticSection/StatisticSection";
+import DaySelector from "../../components/DaySelector/DaySelector";
 
 function CalculatorPage() {
   const [showResults, setShowResults] = useState(false);
   const [apiData, setApiData] = useState(null);
   const [resetTab, setResetTab] = useState(false);
+  const [activeDayIndex, setActiveDayIndex] = useState(0);
 
   const handleGenerate = (data) => {
-    setApiData(data);
+    const formattedData = data.days ? data : { days: [data] };
+
+    setApiData(formattedData);
+    setActiveDayIndex(0);
     setShowResults(true);
     setResetTab(true);
   };
 
   const handleMealReplaced = (mealType, oldDishId, newDishData) => {
     setApiData((prevData) => {
-      if (!prevData || !prevData.meals) return prevData;
+      if (!prevData || !prevData.days) return prevData;
 
-      const updatedMealsList = prevData.meals[mealType].map((dish) =>
+      const currentDayData = prevData.days[activeDayIndex];
+      if (!currentDayData || !currentDayData.meals) return prevData;
+
+      const updatedMealsList = currentDayData.meals[mealType].map((dish) =>
         dish.id === oldDishId ? newDishData : dish,
       );
 
       const newMeals = {
-        ...prevData.meals,
+        ...currentDayData.meals,
         [mealType]: updatedMealsList,
       };
 
@@ -44,8 +52,8 @@ function CalculatorPage() {
         });
       });
 
-      return {
-        ...prevData,
+      const updatedDay = {
+        ...currentDayData,
         meals: newMeals,
         statistics: {
           totalCost: totalCost.toFixed(2),
@@ -57,8 +65,18 @@ function CalculatorPage() {
           },
         },
       };
+
+      const newDaysArray = [...prevData.days];
+      newDaysArray[activeDayIndex] = updatedDay;
+
+      return {
+        ...prevData,
+        days: newDaysArray,
+      };
     });
   };
+
+  const activeDayData = apiData?.days?.[activeDayIndex];
 
   return (
     <div className={styles.calculatorPage}>
@@ -67,16 +85,25 @@ function CalculatorPage() {
         <p>Введіть ваші цілі по макронутрієнтам</p>
       </div>
 
-      <CalculatorForm onGenerate={handleGenerate} />
-      {showResults && (
+      <CalculatorForm onGenerate={handleGenerate} currentMenuData={apiData} />
+      {showResults && activeDayData && (
         <>
+          <DaySelector
+            daysCount={apiData.days.length}
+            activeDayIndex={activeDayIndex}
+            onDaySelect={(index) => {
+              setActiveDayIndex(index);
+              setResetTab(true);
+            }}
+          />
+
           <RationSection
-            meals={apiData.meals}
+            meals={activeDayData.meals}
             resetTab={resetTab}
             onResetDone={() => setResetTab(false)}
             onMealReplaced={handleMealReplaced}
           />
-          <StatisticSection stats={apiData.statistics} />
+          <StatisticSection stats={activeDayData.statistics} />
         </>
       )}
     </div>

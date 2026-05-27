@@ -38,6 +38,8 @@ class OptimizeMealAPIView(GenericAPIView):
     def post(self, request):
         data = request.data
         macros = data.get('target_macros', {})
+        days_count = int(data.get('days', 1))
+
         serializer = self.get_serializer(data=macros)
         serializer.is_valid(raise_exception=True)
 
@@ -65,16 +67,87 @@ class OptimizeMealAPIView(GenericAPIView):
         P_l, F_l, H_l, E_l = P * k_l, F * k_l, H * k_l, E * k_l
         P_d, F_d, H_d, E_d = P * k_d, F * k_d, H * k_d, E * k_d
 
-        result_breakfast = optimize_meal(breakfast_products, P_b, F_b, H_b, E_b)
-        result_lunch = optimize_meal(lunch_products, P_l, F_l, H_l, E_l)
-        result_dinner = optimize_meal(dinner_products, P_d, F_d, H_d, E_d)
+        generated_days_response = []
+
+        used_breakfasts = set()
+        used_lunches = set()
+        used_dinners = set()
+
+        for day_index in range(days_count):
+            daily_breakfast_qs = breakfast_products.exclude(id__in=used_breakfasts)
+            daily_lunch_qs = lunch_products.exclude(id__in=used_lunches)
+            daily_dinner_qs = dinner_products.exclude(id__in=used_dinners)
+
+            result_breakfast = optimize_meal(daily_breakfast_qs, P_b, F_b, H_b, E_b)
+            if not result_breakfast or not result_breakfast.get('items'):
+                used_breakfasts.clear()
+                result_breakfast = optimize_meal(breakfast_products, P_b, F_b, H_b, E_b)
+
+            result_lunch = optimize_meal(daily_lunch_qs, P_l, F_l, H_l, E_l)
+            if not result_lunch or not result_lunch.get('items'):
+                used_lunches.clear()
+                result_lunch = optimize_meal(lunch_products, P_l, F_l, H_l, E_l)
+
+            result_dinner = optimize_meal(daily_dinner_qs, P_d, F_d, H_d, E_d)
+            if not result_dinner or not result_dinner.get('items'):
+                used_dinners.clear()
+                result_dinner = optimize_meal(dinner_products, P_d, F_d, H_d, E_d)
+
+            meals_data = {
+                "breakfast": self._serialize_meal_result(result_breakfast, request),
+                "lunch": self._serialize_meal_result(result_lunch, request),
+                "dinner": self._serialize_meal_result(result_dinner, request)
+            }
+
+            if meals_data['breakfast'] and 'items' in meals_data['breakfast']:
+                for item in meals_data['breakfast']['items']:
+                    if 'id' in item: used_breakfasts.add(item['id'])
+
+            if meals_data['lunch'] and 'items' in meals_data['lunch']:
+                for item in meals_data['lunch']['items']:
+                    if 'id' in item: used_lunches.add(item['id'])
+
+            if meals_data['dinner'] and 'items' in meals_data['dinner']:
+                for item in meals_data['dinner']['items']:
+                    if 'id' in item: used_dinners.add(item['id'])
+
+            day_stats = self._calculate_day_statistics(meals_data)
+
+            day_data = {
+                "day_number": day_index + 1,
+                "meals": meals_data,
+                "statistics": day_stats
+            }
+
+            generated_days_response.append(day_data)
 
         return Response({
             "mode": mode,
-            "breakfast": self._serialize_meal_result(result_breakfast, request),
-            "lunch": self._serialize_meal_result(result_lunch, request),
-            "dinner": self._serialize_meal_result(result_dinner, request)
+            "days": generated_days_response
         }, status=200)
+
+    def _calculate_day_statistics(self, meals_data):
+        stats = {'price': 0, 'calories': 0, 'protein': 0, 'fat': 0, 'carbs': 0}
+
+        for meal_type in ['breakfast', 'lunch', 'dinner']:
+            meal_res = meals_data.get(meal_type)
+            if meal_res and 'totals' in meal_res:
+                t = meal_res['totals']
+                stats['price'] += float(t.get('cost', t.get('price', 0)))
+                stats['calories'] += float(t.get('calories', 0))
+                stats['protein'] += float(t.get('protein', 0))
+                stats['fat'] += float(t.get('fat', 0))
+                stats['carbs'] += float(t.get('carbs', 0))
+
+        return {
+            "totalCost": f"{stats['price']:.2f}",
+            "totalCalories": f"{stats['calories']:.0f}",
+            "macros": {
+                "protein": f"{stats['protein']:.0f}г",
+                "fat": f"{stats['fat']:.0f}г",
+                "carbs": f"{stats['carbs']:.0f}г"
+            }
+        }
 
     def _serialize_meal_result(self, result, request):
         if not result or 'items' not in result:
@@ -212,6 +285,14 @@ class ReplaceDishAPIView(APIView):
         new_total_carbs = (float(best_dish.carbs) / 100) * best_grams
         new_total_cost = (float(getattr(best_dish, 'price', 0)) / 100) * best_grams
 
+        ingredients_data = []
+        for di in best_dish.dishingredient_set.select_related('ingredient'):
+            ingredients_data.append({
+                'ingredient_id': di.ingredient.id,
+                'ingredient_name': di.ingredient.name,
+                'weight_g': di.weight_g
+            })
+
         response_data = {
             'id': best_dish.id,
             'image': best_dish.image.url if getattr(best_dish, 'image', None) else None,
@@ -220,10 +301,12 @@ class ReplaceDishAPIView(APIView):
             'price': round(new_total_cost, 2),
             'portion': f"(~ {round(new_total_cost)} ₴ порція)",
             'weight': round(best_grams, 1),
+            'grams': round(best_grams, 1),
             'calories': round(target_calories, 1),
             'protein': round(new_total_protein, 1),
             'fat': round(new_total_fat, 1),
             'carbs': round(new_total_carbs, 1),
+            'ingredients': ingredients_data,
         }
 
         return Response(response_data, status=200)

@@ -1,0 +1,37 @@
+.daySelector {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+.daySelector::-webkit-scrollbar {
+  display: none;
+}
+
+.dayButton {
+  padding: 10px 24px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: #64748b;
+  white-space: nowrap;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.dayButton:hover {
+  background: #f8fafc;
+}
+
+.dayButton.active {
+  background: #4caf50;
+  color: #ffffff;
+  border-color: #4caf50;
+  box-shadow: 0px 4px 6px rgba(76, 175, 80, 0.25);
+}
