@@ -7,12 +7,12 @@ from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, viewsets, permissions
 from rest_framework.views import APIView
-
-from .models import Dish, FridgeItem, Ingredient
-from .serializers import DishSerializer, MealOptimizeSerializer, FridgeItemSerializer, IngredientSerializer, \
-    ReplaceDishRequestSerializer
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+
+from .models import Dish, FridgeItem, Ingredient, DishIngredient, IncompatibleIngredient
+from .serializers import DishSerializer, MealOptimizeSerializer, FridgeItemSerializer, IngredientSerializer, \
+    ReplaceDishRequestSerializer
 from .optimizer.simplex import optimize_meal
 
 
@@ -54,10 +54,10 @@ class OptimizeMealAPIView(GenericAPIView):
         if selected_products:
             selected_ids = [p['id'] for p in selected_products]
             products = Dish.objects.filter(id__in=selected_ids)
-            mode = "selected_products"
+            mode = 'selected_products'
         else:
             products = Dish.objects.all()
-            mode = "full_day"
+            mode = 'full_day'
 
         breakfast_products = products.filter(meal_type='breakfast')
         lunch_products = products.filter(meal_type='lunch')
@@ -78,25 +78,25 @@ class OptimizeMealAPIView(GenericAPIView):
             daily_lunch_qs = lunch_products.exclude(id__in=used_lunches)
             daily_dinner_qs = dinner_products.exclude(id__in=used_dinners)
 
-            result_breakfast = optimize_meal(daily_breakfast_qs, P_b, F_b, H_b, E_b)
+            result_breakfast = self._get_compatible_meal(daily_breakfast_qs, P_b, F_b, H_b, E_b)
             if not result_breakfast or not result_breakfast.get('items'):
                 used_breakfasts.clear()
-                result_breakfast = optimize_meal(breakfast_products, P_b, F_b, H_b, E_b)
+                result_breakfast = self._get_compatible_meal(breakfast_products, P_b, F_b, H_b, E_b)
 
-            result_lunch = optimize_meal(daily_lunch_qs, P_l, F_l, H_l, E_l)
+            result_lunch = self._get_compatible_meal(daily_lunch_qs, P_l, F_l, H_l, E_l)
             if not result_lunch or not result_lunch.get('items'):
                 used_lunches.clear()
-                result_lunch = optimize_meal(lunch_products, P_l, F_l, H_l, E_l)
+                result_lunch = self._get_compatible_meal(lunch_products, P_l, F_l, H_l, E_l)
 
-            result_dinner = optimize_meal(daily_dinner_qs, P_d, F_d, H_d, E_d)
+            result_dinner = self._get_compatible_meal(daily_dinner_qs, P_d, F_d, H_d, E_d)
             if not result_dinner or not result_dinner.get('items'):
                 used_dinners.clear()
-                result_dinner = optimize_meal(dinner_products, P_d, F_d, H_d, E_d)
+                result_dinner = self._get_compatible_meal(dinner_products, P_d, F_d, H_d, E_d)
 
             meals_data = {
-                "breakfast": self._serialize_meal_result(result_breakfast, request),
-                "lunch": self._serialize_meal_result(result_lunch, request),
-                "dinner": self._serialize_meal_result(result_dinner, request)
+                'breakfast': self._serialize_meal_result(result_breakfast, request),
+                'lunch': self._serialize_meal_result(result_lunch, request),
+                'dinner': self._serialize_meal_result(result_dinner, request)
             }
 
             if meals_data['breakfast'] and 'items' in meals_data['breakfast']:
@@ -114,17 +114,52 @@ class OptimizeMealAPIView(GenericAPIView):
             day_stats = self._calculate_day_statistics(meals_data)
 
             day_data = {
-                "day_number": day_index + 1,
-                "meals": meals_data,
-                "statistics": day_stats
+                'day_number': day_index + 1,
+                'meals': meals_data,
+                'statistics': day_stats
             }
 
             generated_days_response.append(day_data)
 
         return Response({
-            "mode": mode,
-            "days": generated_days_response
+            'mode': mode,
+            'days': generated_days_response
         }, status=200)
+
+    def _get_compatible_meal(self, daily_qs, P, F, H, E, max_retries=5):
+        titles_in = list(daily_qs.values_list('title', flat=True))
+        banned_dish_ids = set()
+
+        for attempt in range(max_retries):
+            qs = daily_qs.exclude(id__in=banned_dish_ids)
+            result = optimize_meal(qs, P, F, H, E)
+
+            if not result or not result.get('items'):
+                return None
+
+            dish_ids = [item['id'] for item in result['items']]
+
+            dish_ingredients = DishIngredient.objects.filter(dish_id__in=dish_ids)
+
+            ing_to_dish = {}
+            for di in dish_ingredients:
+                ing_to_dish[di.ingredient_id] = di.dish_id
+
+            ing_ids = list(ing_to_dish.keys())
+
+            conflict = IncompatibleIngredient.objects.filter(
+                ingredient_1_id__in=ing_ids,
+                ingredient_2_id__in=ing_ids
+            ).first()
+
+            if not conflict:
+                return result
+
+            conflict_dish_id = ing_to_dish.get(conflict.ingredient_2_id)
+            if conflict_dish_id:
+                banned_dish_ids.add(conflict_dish_id)
+
+        return result
 
     def _calculate_day_statistics(self, meals_data):
         stats = {'price': 0, 'calories': 0, 'protein': 0, 'fat': 0, 'carbs': 0}
@@ -140,12 +175,12 @@ class OptimizeMealAPIView(GenericAPIView):
                 stats['carbs'] += float(t.get('carbs', 0))
 
         return {
-            "totalCost": f"{stats['price']:.2f}",
-            "totalCalories": f"{stats['calories']:.0f}",
-            "macros": {
-                "protein": f"{stats['protein']:.0f}г",
-                "fat": f"{stats['fat']:.0f}г",
-                "carbs": f"{stats['carbs']:.0f}г"
+            'totalCost': f'{stats['price']:.2f}',
+            'totalCalories': f'{stats['calories']:.0f}',
+            'macros': {
+                'protein': f'{stats['protein']:.0f}г',
+                'fat': f'{stats['fat']:.0f}г',
+                'carbs': f'{stats['carbs']:.0f}г'
             }
         }
 
@@ -299,7 +334,7 @@ class ReplaceDishAPIView(APIView):
             'title': best_dish.title,
             'description': best_dish.description,
             'price': round(new_total_cost, 2),
-            'portion': f"(~ {round(new_total_cost)} ₴ порція)",
+            'portion': f'(~ {round(new_total_cost)} ₴ порція)',
             'weight': round(best_grams, 1),
             'grams': round(best_grams, 1),
             'calories': round(target_calories, 1),

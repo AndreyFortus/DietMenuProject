@@ -3,7 +3,7 @@ import os
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.core.files import File
-from core.models import Dish, Ingredient, DishIngredient
+from core.models import Dish, Ingredient, DishIngredient, IncompatibleIngredient
 
 
 class Command(BaseCommand):
@@ -263,5 +263,33 @@ class Command(BaseCommand):
             dish.portion = f'(~ {int(total_weight)} г порція)'
 
             dish.save()
+
+        self.stdout.write('Завантаження правил несумісності...')
+
+        incompatibilities_data = [
+            ('Молоко 2.5%', 'Огірок', 'Викликає розлад шлунку'),
+            ('Молоко 2.5%', 'Тріска (риба)', 'Погано засвоюється разом'),
+            ('Молоко 2.5%', 'Лосось (свіжий)', 'Погано засвоюється разом'),
+            ('Грецький йогурт', 'Тріска (риба)', 'Несумісність молочного та рибного'),
+        ]
+
+        IncompatibleIngredient.objects.all().delete()
+
+        count_incompatibilities = 0
+        for ing1_name, ing2_name, reason in incompatibilities_data:
+            ing1 = ing_objects.get(ing1_name)
+            ing2 = ing_objects.get(ing2_name)
+
+            if ing1 and ing2:
+                IncompatibleIngredient.objects.get_or_create(
+                    ingredient_1=ing1,
+                    ingredient_2=ing2,
+                    defaults={'reason': reason}
+                )
+                count_incompatibilities += 1
+            else:
+                self.stdout.write(self.style.WARNING(f'Не вдалося створити правило для: {ing1_name} - {ing2_name}'))
+
+        self.stdout.write(f'Додано {count_incompatibilities} правил несумісності.')
 
         self.stdout.write(self.style.SUCCESS('--- БД оновлено ---'))
