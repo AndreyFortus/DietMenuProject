@@ -120,14 +120,13 @@ class IncompatibleIngredient(models.Model):
 
 
 class SavedPlan(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_plans')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='saved_plan')
     plan_data = models.JSONField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-created_at']
         verbose_name = 'Збережений план'
         verbose_name_plural = 'Збережені плани'
 
     def __str__(self):
-        return f'План для {self.user.email} від {self.created_at.strftime('%d.%m.%Y %H:%M')}'
+        return f'План для {self.user.email}'

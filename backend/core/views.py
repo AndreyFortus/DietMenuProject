@@ -356,4 +356,8 @@ class SavedPlanListCreateAPIView(ListCreateAPIView):
         return SavedPlan.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        instance, created = SavedPlan.objects.update_or_create(
+            user=self.request.user,
+            defaults={'plan_data': serializer.validated_data['plan_data']}
+        )
+        serializer.instance = instance
