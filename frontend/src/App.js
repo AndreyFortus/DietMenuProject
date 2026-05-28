@@ -9,6 +9,7 @@ import HomePage from "./pages/HomePage/HomePage";
 import CalculatorPage from "./pages/CalculatorPage/CalculatorPage";
 import DishesPage from "./pages/DishesPage/DishesPage";
 import FridgePage from "./pages/FridgePage/FridgePage";
+import SavedPlanPage from "./pages/SavedPlanPage/SavedPlanPage";
 import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
 
 const isTokenExpired = (token) => {
@@ -111,6 +112,7 @@ function App() {
           <Route path="/calculator" element={<CalculatorPage />} />
           <Route path="/dishes" element={<DishesPage />} />
           <Route path="/fridge" element={<FridgePage />} />
+          <Route path="/my-plan" element={<SavedPlanPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

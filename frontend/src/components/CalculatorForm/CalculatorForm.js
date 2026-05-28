@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./CalculatorForm.module.css";
 import Button from "../Button/Button";
 import NutrientInput from "../NutrientInput/NutrientInput";
-import ShoppingList from "../ShoppingList/ShoppingList";
 
-import { calculateShoppingList } from "../../utils/shoppingLogic";
 import api from "../../api";
 
 import { ReactComponent as SearchIcon } from "../../assets/search-icon.svg";
@@ -23,16 +22,14 @@ const MIN_VALUES = {
 };
 
 function CalculatorForm({ onGenerate, currentMenuData }) {
+  const navigate = useNavigate();
+
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
-  // const [shoppingList, setShoppingList] = useState(null);
-  const [isShoppingListOpen, setIsShoppingListOpen] = useState(false);
-  const [isShoppingListLoading, setIsShoppingListLoading] = useState(false);
-  const [isDeducting, setIsDeducting] = useState(false);
-  const [currentFridge, setCurrentFridge] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [macros, setMacros] = useState({
     protein: "",
@@ -66,7 +63,6 @@ function CalculatorForm({ onGenerate, currentMenuData }) {
         if (!mounted) return;
         const productsWithState = data.map((p) => ({ ...p, checked: false }));
         setAllProducts(productsWithState);
-        console.log("Products loaded:", productsWithState.length);
       } catch (err) {
         if (err.name === "AbortError") return;
         console.error("Error loading products:", err);
@@ -177,8 +173,6 @@ function CalculatorForm({ onGenerate, currentMenuData }) {
       days: Number(daysCount),
     };
 
-    console.log("Sending data to backend:", requestData);
-
     setIsLoading(true);
 
     try {
@@ -192,7 +186,6 @@ function CalculatorForm({ onGenerate, currentMenuData }) {
         throw new Error(text || `Server error ${res.status}`);
       }
       const data = await res.json();
-      console.log("Received response:", data);
 
       setResult(data);
 
@@ -241,6 +234,24 @@ function CalculatorForm({ onGenerate, currentMenuData }) {
     }
   }, [macros, allProducts, validate, onGenerate, daysCount]);
 
+  const handleSavePlan = async () => {
+    const actualData = currentMenuData || result;
+    if (!actualData || !actualData.days) return;
+
+    setIsSaving(true);
+    try {
+      await api.post("plans/", {
+        plan_data: actualData,
+      });
+      navigate("/my-plan");
+    } catch (error) {
+      console.error("Помилка при збереженні плану:", error);
+      alert("Не вдалося зберегти раціон. Спробуйте ще раз.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const contentClassName = isProductsOpen
     ? styles.productsContent
     : `${styles.productsContent} ${styles.productsContentClosed}`;
@@ -265,123 +276,6 @@ function CalculatorForm({ onGenerate, currentMenuData }) {
       </label>
     ));
   };
-
-  const handleShowShoppingList = async () => {
-    setIsShoppingListLoading(true);
-    try {
-      const fridgeRes = await api.get("fridge/");
-      setCurrentFridge(fridgeRes.data);
-      setIsShoppingListOpen(true);
-    } catch (error) {
-      console.error("Помилка завантаження холодильника:", error);
-    } finally {
-      setIsShoppingListLoading(false);
-    }
-  };
-
-  const handleCookMeal = async () => {
-    const actualData = currentMenuData || result;
-
-    if (!actualData || !actualData.days) return;
-
-    if (
-      !window.confirm("Списати використані продукти з вашого холодильника?")
-    ) {
-      return;
-    }
-
-    setIsDeducting(true);
-    try {
-      const fridgeRes = await api.get("fridge/");
-      const currentFridge = fridgeRes.data;
-      const requirements = {};
-
-      actualData.days.forEach((day) => {
-        const meals = day.meals;
-
-        ["breakfast", "lunch", "dinner"].forEach((mealType) => {
-          let itemsArray = [];
-          if (Array.isArray(meals[mealType])) {
-            itemsArray = meals[mealType];
-          } else if (meals[mealType] && meals[mealType].items) {
-            itemsArray = meals[mealType].items;
-          }
-
-          itemsArray.forEach((dish) => {
-            if (!dish.ingredients || dish.ingredients.length === 0) return;
-
-            const standardDishWeight = dish.ingredients.reduce(
-              (sum, ing) => sum + (ing.weight_g || 0),
-              0,
-            );
-
-            const targetWeight =
-              Number(dish.weight) || Number(dish.grams) || standardDishWeight;
-
-            let ratio = 1;
-            if (standardDishWeight > 0 && targetWeight > 0) {
-              ratio = targetWeight / standardDishWeight;
-            }
-
-            dish.ingredients.forEach((ing) => {
-              const id = ing.ingredient_id;
-              if (!requirements[id]) {
-                requirements[id] = {
-                  id: id,
-                  name: ing.ingredient_name,
-                  totalNeeded: 0,
-                };
-              }
-              requirements[id].totalNeeded += (ing.weight_g || 0) * ratio;
-            });
-          });
-        });
-      });
-
-      const operations = [];
-
-      Object.values(requirements).forEach((req) => {
-        const fridgeItem = currentFridge.find(
-          (item) => item.ingredient === req.id,
-        );
-
-        if (fridgeItem) {
-          const remainder = fridgeItem.weight_g - req.totalNeeded;
-
-          if (remainder <= 0) {
-            operations.push(api.delete(`fridge/${fridgeItem.id}/`));
-          } else {
-            operations.push(
-              api.patch(`fridge/${fridgeItem.id}/`, {
-                weight_g: Math.round(remainder),
-              }),
-            );
-          }
-        }
-      });
-
-      if (operations.length > 0) {
-        await Promise.all(operations);
-        alert("✅ Смачного! Продукти успішно списані з холодильника.");
-      } else {
-        alert(
-          "У холодильнику не знайдено жодного продукту з цього раціону для списання.",
-        );
-      }
-    } catch (error) {
-      console.error("Помилка списання:", error);
-      alert("❌ Не вдалося списати продукти.");
-    } finally {
-      setIsDeducting(false);
-    }
-  };
-
-  const shoppingList = useMemo(() => {
-    if (!isShoppingListOpen) return null;
-
-    const actualMenuData = currentMenuData || result;
-    return calculateShoppingList(actualMenuData, currentFridge);
-  }, [currentMenuData, result, currentFridge, isShoppingListOpen]);
 
   return (
     <div className={styles.calculatorForm} aria-busy={isLoading}>
@@ -527,30 +421,20 @@ function CalculatorForm({ onGenerate, currentMenuData }) {
           </Button>
         </div>
       </div>
+
       {(currentMenuData || result) && (
         <div className={styles.resultSection}>
-          {!isShoppingListOpen ? (
-            <div className={styles.shoppingListButtonWrapper}>
-              <div onClick={handleShowShoppingList}>
-                <Button
-                  variant="secondary"
-                  disabled={isShoppingListLoading}
-                  iconBefore={<span>🛒</span>}
-                >
-                  {isShoppingListLoading
-                    ? "Аналізуємо холодильник..."
-                    : "Сформувати список покупок"}
-                </Button>
-              </div>
+          <div className={styles.shoppingListButtonWrapper}>
+            <div onClick={handleSavePlan}>
+              <Button
+                variant="secondary"
+                disabled={isSaving}
+                iconBefore={<span>💾</span>}
+              >
+                {isSaving ? "Збереження..." : "Зберегти раціон"}
+              </Button>
             </div>
-          ) : (
-            <ShoppingList
-              list={shoppingList}
-              onClose={() => setIsShoppingListOpen(false)}
-              onCook={handleCookMeal}
-              isDeducting={isDeducting}
-            />
-          )}
+          </div>
         </div>
       )}
     </div>
