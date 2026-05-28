@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from .views import ProductListAPIView, OptimizeMealAPIView, FridgeViewSet, GoogleLogin, IngredientListAPIView, \
-    ReplaceDishAPIView
+    ReplaceDishAPIView, SavedPlanListCreateAPIView
 
 router = DefaultRouter()
 router.register(r'fridge', FridgeViewSet, basename='fridge')
@@ -15,4 +15,5 @@ urlpatterns = [
     path('replace-dish/', ReplaceDishAPIView.as_view(), name='replace_dish'),
     path('auth/', include('dj_rest_auth.urls')),
     path('auth/google/', GoogleLogin.as_view(), name='google_login'),
+    path('plans/', SavedPlanListCreateAPIView.as_view(), name='saved-plans'),
 ]

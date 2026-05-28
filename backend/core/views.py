@@ -6,13 +6,14 @@ from dj_rest_auth.registration.views import SocialLoginView
 from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, viewsets, permissions
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from rest_framework.response import Response
 
-from .models import Dish, FridgeItem, Ingredient, DishIngredient, IncompatibleIngredient
+from .models import Dish, FridgeItem, Ingredient, DishIngredient, IncompatibleIngredient, SavedPlan
 from .serializers import DishSerializer, MealOptimizeSerializer, FridgeItemSerializer, IngredientSerializer, \
-    ReplaceDishRequestSerializer
+    ReplaceDishRequestSerializer, SavedPlanSerializer
 from .optimizer.simplex import optimize_meal
 
 
@@ -345,3 +346,14 @@ class ReplaceDishAPIView(APIView):
         }
 
         return Response(response_data, status=200)
+
+
+class SavedPlanListCreateAPIView(ListCreateAPIView):
+    serializer_class = SavedPlanSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return SavedPlan.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

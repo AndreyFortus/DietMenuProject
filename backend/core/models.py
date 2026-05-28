@@ -116,4 +116,18 @@ class IncompatibleIngredient(models.Model):
         verbose_name_plural = 'Несумісності інгредієнтів'
 
     def __str__(self):
-        return f"{self.ingredient_1.name} ❌ {self.ingredient_2.name}"
+        return f'{self.ingredient_1.name} and {self.ingredient_2.name}'
+
+
+class SavedPlan(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_plans')
+    plan_data = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Збережений план'
+        verbose_name_plural = 'Збережені плани'
+
+    def __str__(self):
+        return f'План для {self.user.email} від {self.created_at.strftime('%d.%m.%Y %H:%M')}'
