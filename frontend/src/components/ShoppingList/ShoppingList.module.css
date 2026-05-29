@@ -52,6 +52,10 @@
   font-weight: 600;
 }
 
+.buyHeader {
+  color: #ef4444 !important;
+}
+
 .table tr {
   border-bottom: 1px solid #f3f4f6;
 }
@@ -73,73 +77,4 @@
 .buyAmount {
   font-weight: 700;
   color: #ef4444;
-}
-
-.closeButtonContainer {
-  margin-top: 20px;
-  text-align: center;
-}
-
-.closeButton {
-  background: none;
-  border: none;
-  color: #6b7280;
-  cursor: pointer;
-  text-decoration: underline;
-  font-size: 14px;
-  transition: color 0.2s;
-}
-
-.closeButton:hover {
-  color: #374151;
-}
-
-.resultSection {
-  margin-top: 40px;
-  padding-top: 20px;
-  border-top: 1px solid #eaeaea;
-  width: 100%;
-}
-
-.shoppingListButtonWrapper {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  width: 100%;
-  margin-bottom: 24px;
-}
-
-.actionsContainer {
-  margin-top: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.cookButton {
-  background-color: #f59e0b;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background-color 0.2s,
-    transform 0.1s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cookButton:hover:not(:disabled) {
-  background-color: #d97706;
-  transform: translateY(-1px);
-}
-
-.cookButton:disabled {
-  background-color: #fcd34d;
-  cursor: not-allowed;
 }

@@ -56,12 +56,12 @@ export const calculateShoppingList = (menuData, fridgeItems) => {
     const haveAmount = inFridge ? inFridge.weight_g : 0;
     const toBuy = req.totalNeeded - haveAmount;
 
-    if (toBuy > 0) {
+    if (req.totalNeeded > 0) {
       shoppingList.push({
         name: req.name,
         needed: Math.round(req.totalNeeded),
         have: haveAmount,
-        toBuy: Math.round(toBuy),
+        toBuy: toBuy > 0 ? Math.round(toBuy) : 0,
       });
     }
   });

@@ -15,7 +15,6 @@ function SavedPlanPage() {
   const [plan, setPlan] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentFridge, setCurrentFridge] = useState([]);
-  const [isDeducting, setIsDeducting] = useState(false);
   const [selectedDay, setSelectedDay] = useState(1);
 
   const mealTypeConfig = {
@@ -49,7 +48,7 @@ function SavedPlanPage() {
         }
         setCurrentFridge(fridgeRes.data);
       } catch (error) {
-        console.error("Помилка завантаження даних:", error);
+        console.error(error);
       } finally {
         setIsLoading(false);
       }
@@ -61,22 +60,6 @@ function SavedPlanPage() {
     if (!plan || !currentFridge) return null;
     return calculateShoppingList(plan, currentFridge);
   }, [plan, currentFridge]);
-
-  const handleCookMeal = async () => {
-    if (!plan || !window.confirm("Списати продукти з холодильника?")) return;
-
-    setIsDeducting(true);
-    try {
-      await api.patch("fridge/...", {});
-      alert("Смачного! Продукти списані.");
-      const fridgeRes = await api.get("fridge/");
-      setCurrentFridge(fridgeRes.data);
-    } catch (e) {
-      alert("Помилка списання");
-    } finally {
-      setIsDeducting(false);
-    }
-  };
 
   if (!isAuthenticated) {
     return (
@@ -113,7 +96,6 @@ function SavedPlanPage() {
         </p>
       </header>
 
-      {/* Кнопки перемикання днів */}
       <div className={styles.dayTabs}>
         {plan.days.map((day) => (
           <button
@@ -158,11 +140,7 @@ function SavedPlanPage() {
       </main>
 
       <section className={styles.shoppingListSection}>
-        <ShoppingList
-          list={shoppingList}
-          onCook={handleCookMeal}
-          isDeducting={isDeducting}
-        />
+        <ShoppingList list={shoppingList} />
       </section>
     </div>
   );

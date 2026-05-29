@@ -143,25 +143,25 @@ class OptimizeMealAPIView(GenericAPIView):
             'days': generated_days_response
         }, status=200)
 
-    def _get_compatible_meal(self, daily_qs, P, F, H, E, max_retries=5):
-        titles_in = list(daily_qs.values_list('title', flat=True))
+    def _get_compatible_meal(self, daily_qs, P, F, H, E, max_retries=10):
         banned_dish_ids = set()
+        fallback_result = None
+        min_tiny_dishes = float('inf')
+
+        sample = daily_qs.first()
+        min_weight = 60 if sample and sample.meal_type == 'breakfast' else 100
 
         for attempt in range(max_retries):
             qs = daily_qs.exclude(id__in=banned_dish_ids)
             result = optimize_meal(qs, P, F, H, E)
 
             if not result or not result.get('items'):
-                return None
+                break
 
             dish_ids = [item['id'] for item in result['items']]
-
             dish_ingredients = DishIngredient.objects.filter(dish_id__in=dish_ids)
 
-            ing_to_dish = {}
-            for di in dish_ingredients:
-                ing_to_dish[di.ingredient_id] = di.dish_id
-
+            ing_to_dish = {di.ingredient_id: di.dish_id for di in dish_ingredients}
             ing_ids = list(ing_to_dish.keys())
 
             conflict = IncompatibleIngredient.objects.filter(
@@ -169,14 +169,39 @@ class OptimizeMealAPIView(GenericAPIView):
                 ingredient_2_id__in=ing_ids
             ).first()
 
-            if not conflict:
+            if conflict:
+                conflict_dish_id = ing_to_dish.get(conflict.ingredient_2_id)
+                if conflict_dish_id:
+                    banned_dish_ids.add(conflict_dish_id)
+                continue
+
+            tiny_dishes = [item for item in result['items'] if
+                           item.get('grams', 0) > 0 and item.get('grams', 0) < min_weight]
+
+            if not tiny_dishes:
                 return result
 
-            conflict_dish_id = ing_to_dish.get(conflict.ingredient_2_id)
-            if conflict_dish_id:
-                banned_dish_ids.add(conflict_dish_id)
+            if len(tiny_dishes) < min_tiny_dishes:
+                min_tiny_dishes = len(tiny_dishes)
+                fallback_result = result
 
-        return result
+            smallest_dish = min(tiny_dishes, key=lambda x: x.get('grams', 0))
+            banned_dish_ids.add(smallest_dish['id'])
+
+        if fallback_result:
+            valid_items = [item for item in fallback_result['items'] if item.get('grams', 0) >= min_weight]
+            fallback_result['items'] = valid_items
+
+            fallback_result['totals'] = {
+                'calories': sum(i.get('calories', 0) for i in valid_items),
+                'protein': sum(i.get('protein', 0) for i in valid_items),
+                'fat': sum(i.get('fat', 0) for i in valid_items),
+                'carbs': sum(i.get('carbs', 0) for i in valid_items),
+                'cost': sum(i.get('cost', i.get('price', 0)) for i in valid_items),
+            }
+            return fallback_result
+
+        return None
 
     def _calculate_day_statistics(self, meals_data):
         stats = {'price': 0, 'calories': 0, 'protein': 0, 'fat': 0, 'carbs': 0}
