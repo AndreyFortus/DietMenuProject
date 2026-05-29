@@ -15,8 +15,8 @@ import { ReactComponent as LogoutIcon } from "../../assets/logout-icon.svg";
 const NAV_ITEMS = [
   { to: "/calculator", icon: <RationIcon />, label: "Раціон" },
   { to: "/my-plan", icon: <PlanIcon />, label: "Мій план" },
-  { to: "/dishes", icon: <DishesIcon />, label: "Страви" },
   { to: "/fridge", icon: <FridgeIcon />, label: "Холодильник" },
+  { to: "/dishes", icon: <DishesIcon />, label: "Страви" },
 ];
 
 function Sidebar({ isOpen, onToggle, user, onLogin, onLogout }) {
