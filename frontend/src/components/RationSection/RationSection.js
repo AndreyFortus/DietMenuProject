@@ -77,22 +77,29 @@ function RationSection({ meals, resetTab, onResetDone, onMealReplaced }) {
 
         <div className={styles.list} ref={listRef}>
           {currentList.length > 0 ? (
-            currentList.map((meal) => (
-              <div key={meal.id} className={styles.mealCardWrapper}>
-                <MealCard data={meal} className={styles.sliderCard} />
+            currentList.map((meal) => {
+              const otherIds = currentList
+                .filter((d) => d.id !== meal.id)
+                .map((d) => d.id);
 
-                <ReplaceDish
-                  dishId={meal.id}
-                  grams={meal.weight}
-                  mealType={activeTab}
-                  onReplaceSuccess={(oldId, newDish) => {
-                    if (onMealReplaced) {
-                      onMealReplaced(activeTab, oldId, newDish);
-                    }
-                  }}
-                />
-              </div>
-            ))
+              return (
+                <div key={meal.id} className={styles.mealCardWrapper}>
+                  <MealCard data={meal} className={styles.sliderCard} />
+
+                  <ReplaceDish
+                    dishId={meal.id}
+                    grams={meal.weight}
+                    mealType={activeTab}
+                    otherDishIds={otherIds}
+                    onReplaceSuccess={(oldId, newDish) => {
+                      if (onMealReplaced) {
+                        onMealReplaced(activeTab, oldId, newDish);
+                      }
+                    }}
+                  />
+                </div>
+              );
+            })
           ) : (
             <div className={styles.emptyMessage}>
               Неможливо згенерувати страви для цієї категорії. Спробуйте змінити

@@ -2,7 +2,13 @@ import React, { useState } from "react";
 import Button from "../Button/Button";
 import styles from "./ReplaceDish.module.css";
 
-const ReplaceDish = ({ dishId, grams, mealType, onReplaceSuccess }) => {
+const ReplaceDish = ({
+  dishId,
+  grams,
+  mealType,
+  onReplaceSuccess,
+  otherDishIds = [],
+}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -22,6 +28,7 @@ const ReplaceDish = ({ dishId, grams, mealType, onReplaceSuccess }) => {
           dish_id: dishId,
           grams: grams,
           meal_type: mealType,
+          other_dish_ids: otherDishIds,
         }),
       });
 

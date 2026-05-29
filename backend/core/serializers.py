@@ -52,6 +52,11 @@ class ReplaceDishRequestSerializer(serializers.Serializer):
     meal_type = serializers.ChoiceField(
         choices=['breakfast', 'lunch', 'dinner'],
     )
+    other_dish_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        default=list
+    )
 
 
 class SavedPlanSerializer(serializers.ModelSerializer):

@@ -17,6 +17,22 @@ from .serializers import DishSerializer, MealOptimizeSerializer, FridgeItemSeria
 from .optimizer.simplex import optimize_meal
 
 
+def check_compatibility(candidate_dish, other_dishes):
+    if not other_dishes:
+        return True
+
+    dish_ids = [candidate_dish.id] + [d.id for d in other_dishes]
+    dish_ingredients = DishIngredient.objects.filter(dish_id__in=dish_ids)
+    ing_ids = list(dish_ingredients.values_list('ingredient_id', flat=True))
+
+    conflict = IncompatibleIngredient.objects.filter(
+        ingredient_1_id__in=ing_ids,
+        ingredient_2_id__in=ing_ids
+    ).exists()
+
+    return not conflict
+
+
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
@@ -176,12 +192,12 @@ class OptimizeMealAPIView(GenericAPIView):
                 stats['carbs'] += float(t.get('carbs', 0))
 
         return {
-            'totalCost': f'{stats['price']:.2f}',
-            'totalCalories': f'{stats['calories']:.0f}',
+            'totalCost': f"{stats['price']:.2f}",
+            'totalCalories': f"{stats['calories']:.0f}",
             'macros': {
-                'protein': f'{stats['protein']:.0f}г',
-                'fat': f'{stats['fat']:.0f}г',
-                'carbs': f'{stats['carbs']:.0f}г'
+                'protein': f"{stats['protein']:.0f}г",
+                'fat': f"{stats['fat']:.0f}г",
+                'carbs': f"{stats['carbs']:.0f}г"
             }
         }
 
@@ -272,6 +288,7 @@ class ReplaceDishAPIView(APIView):
         old_dish_id = data['dish_id']
         current_grams = data['grams']
         meal_type = data['meal_type']
+        other_dish_ids = data.get('other_dish_ids', [])
 
         try:
             old_dish = Dish.objects.get(id=old_dish_id)
@@ -282,6 +299,8 @@ class ReplaceDishAPIView(APIView):
 
         if not candidates.exists():
             return Response({'error': 'No alternatives for this dish'}, status=400)
+
+        other_dishes = Dish.objects.filter(id__in=other_dish_ids)
 
         target_calories = (float(old_dish.calories) / 100) * float(current_grams)
         target_p = (float(old_dish.protein) / 100) * float(current_grams)
@@ -294,6 +313,9 @@ class ReplaceDishAPIView(APIView):
 
         for dish in candidates:
             if float(dish.calories) == 0:
+                continue
+
+            if not check_compatibility(dish, other_dishes):
                 continue
 
             cand_grams = (target_calories / float(dish.calories)) * 100
