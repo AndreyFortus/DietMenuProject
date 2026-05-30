@@ -103,3 +103,30 @@ class FridgeItem(models.Model):
 
     def __str__(self):
         return f'{self.user.username} - {self.ingredient.name} ({self.weight_g}г)'
+
+
+class IncompatibleIngredient(models.Model):
+    ingredient_1 = models.ForeignKey(Ingredient, related_name='incompatibilities_1', on_delete=models.CASCADE)
+    ingredient_2 = models.ForeignKey(Ingredient, related_name='incompatibilities_2', on_delete=models.CASCADE)
+    reason = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        unique_together = ('ingredient_1', 'ingredient_2')
+        verbose_name = 'Несумісність інгредієнтів'
+        verbose_name_plural = 'Несумісності інгредієнтів'
+
+    def __str__(self):
+        return f'{self.ingredient_1.name} and {self.ingredient_2.name}'
+
+
+class SavedPlan(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='saved_plan')
+    plan_data = models.JSONField()
+    created_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Збережений план'
+        verbose_name_plural = 'Збережені плани'
+
+    def __str__(self):
+        return f'План для {self.user.email}'

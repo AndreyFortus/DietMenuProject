@@ -8,13 +8,15 @@ import { ReactComponent as RationIcon } from "../../assets/ration-icon.svg";
 import { ReactComponent as DishesIcon } from "../../assets/dishes-icon.svg";
 import { ReactComponent as ThemeIcon } from "../../assets/theme-icon.svg";
 import { ReactComponent as FridgeIcon } from "../../assets/fridge-icon.svg";
+import { ReactComponent as PlanIcon } from "../../assets/plan-icon.svg";
 import { ReactComponent as GoogleIcon } from "../../assets/google-logo.svg";
 import { ReactComponent as LogoutIcon } from "../../assets/logout-icon.svg";
 
 const NAV_ITEMS = [
   { to: "/calculator", icon: <RationIcon />, label: "Раціон" },
-  { to: "/dishes", icon: <DishesIcon />, label: "Страви" },
+  { to: "/my-plan", icon: <PlanIcon />, label: "Мій план" },
   { to: "/fridge", icon: <FridgeIcon />, label: "Холодильник" },
+  { to: "/dishes", icon: <DishesIcon />, label: "Страви" },
 ];
 
 function Sidebar({ isOpen, onToggle, user, onLogin, onLogout }) {

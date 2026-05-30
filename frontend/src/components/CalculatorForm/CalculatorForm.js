@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./CalculatorForm.module.css";
 import Button from "../Button/Button";
 import NutrientInput from "../NutrientInput/NutrientInput";
-import ShoppingList from "../ShoppingList/ShoppingList";
 
-import { calculateShoppingList } from "../../utils/shoppingLogic";
 import api from "../../api";
 
 import { ReactComponent as SearchIcon } from "../../assets/search-icon.svg";
 import { ReactComponent as SparkleIcon } from "../../assets/sparkle-icon.svg";
 import { ReactComponent as ChevronUpIcon } from "../../assets/chevron-up.svg";
+import { ReactComponent as SaveIcon } from "../../assets/save-icon.svg";
 
 const BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -22,15 +22,15 @@ const MIN_VALUES = {
   carbs: 130,
 };
 
-function CalculatorForm({ onGenerate }) {
+function CalculatorForm({ onGenerate, currentMenuData }) {
+  const navigate = useNavigate();
+
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [shoppingList, setShoppingList] = useState(null);
-  const [isShoppingListLoading, setIsShoppingListLoading] = useState(false);
-  const [isDeducting, setIsDeducting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [macros, setMacros] = useState({
     protein: "",
@@ -46,8 +46,21 @@ function CalculatorForm({ onGenerate }) {
     calories: "",
   });
 
+  const [daysCount, setDaysCount] = useState(1);
+
   const [errors, setErrors] = useState({});
   const [loadError, setLoadError] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const dayOptions = [
+    { value: 1, label: "1 день" },
+    { value: 2, label: "2 дні" },
+    { value: 3, label: "3 дні" },
+    { value: 4, label: "4 дні" },
+    { value: 5, label: "5 днів" },
+    { value: 6, label: "6 днів" },
+    { value: 7, label: "1 тиждень" },
+  ];
 
   useEffect(() => {
     const ac = new AbortController();
@@ -62,7 +75,6 @@ function CalculatorForm({ onGenerate }) {
         if (!mounted) return;
         const productsWithState = data.map((p) => ({ ...p, checked: false }));
         setAllProducts(productsWithState);
-        console.log("Products loaded:", productsWithState.length);
       } catch (err) {
         if (err.name === "AbortError") return;
         console.error("Error loading products:", err);
@@ -170,12 +182,10 @@ function CalculatorForm({ onGenerate }) {
         calories: Number(macros.calories),
       },
       selected_products: selectedProducts,
+      days: Number(daysCount),
     };
 
-    console.log("Sending data to backend:", requestData);
-
     setIsLoading(true);
-    setShoppingList(null);
 
     try {
       const res = await fetch(CALCULATE_API_URL, {
@@ -188,7 +198,6 @@ function CalculatorForm({ onGenerate }) {
         throw new Error(text || `Server error ${res.status}`);
       }
       const data = await res.json();
-      console.log("Received response:", data);
 
       setResult(data);
 
@@ -199,66 +208,34 @@ function CalculatorForm({ onGenerate }) {
 
         return items.map((item, index) => ({
           id: item.id || `${Date.now()}-${index}`,
-          title: item.name,
+          title: item.title || item.name || "",
           description: item.description || "",
           image: item.image || "",
           price: item.cost ? item.cost.toFixed(2) : "0.00",
-          portion: `(~ ${item.cost ? item.cost.toFixed(0) : 0} ₴ порція)`,
+          portion: "",
           weight: item.grams ? item.grams.toFixed(0) : null,
           calories: item.calories ? item.calories.toFixed(0) : "0",
           protein: item.protein ? item.protein.toFixed(0) : "0",
           fat: item.fat ? item.fat.toFixed(0) : "0",
           carbs: item.carbs ? item.carbs.toFixed(0) : "0",
+          grams: item.grams || item.weight || 0,
+          ingredients: item.ingredients || [],
         }));
       };
 
-      const formattedMeals = {
-        breakfast: formatMealItems(data.breakfast?.items),
-        lunch: formatMealItems(data.lunch?.items),
-        dinner: formatMealItems(data.dinner?.items),
-      };
-
-      const getTotal = (mealData, field) => {
-        return mealData?.totals?.[field] || 0;
-      };
-
-      const totalStats = {
-        price:
-          getTotal(data.breakfast, "price") +
-          getTotal(data.lunch, "price") +
-          getTotal(data.dinner, "price"),
-        calories:
-          getTotal(data.breakfast, "calories") +
-          getTotal(data.lunch, "calories") +
-          getTotal(data.dinner, "calories"),
-        protein:
-          getTotal(data.breakfast, "protein") +
-          getTotal(data.lunch, "protein") +
-          getTotal(data.dinner, "protein"),
-        fat:
-          getTotal(data.breakfast, "fat") +
-          getTotal(data.lunch, "fat") +
-          getTotal(data.dinner, "fat"),
-        carbs:
-          getTotal(data.breakfast, "carbs") +
-          getTotal(data.lunch, "carbs") +
-          getTotal(data.dinner, "carbs"),
-      };
+      const formattedDays = data.days.map((day) => ({
+        day_number: day.day_number,
+        meals: {
+          breakfast: formatMealItems(day.meals?.breakfast?.items),
+          lunch: formatMealItems(day.meals?.lunch?.items),
+          dinner: formatMealItems(day.meals?.dinner?.items),
+        },
+        statistics: day.statistics,
+      }));
 
       const formattedData = {
-        meals: formattedMeals,
-        statistics: {
-          totalCost: totalStats.price.toFixed(2),
-          totalCalories: totalStats.calories.toFixed(0),
-          macros: {
-            protein: `${totalStats.protein.toFixed(0)}г`,
-            fat: `${totalStats.fat.toFixed(0)}г`,
-            carbs: `${totalStats.carbs.toFixed(0)}г`,
-          },
-        },
+        days: formattedDays,
       };
-
-      setIsProductsOpen(true);
 
       if (onGenerate) onGenerate(formattedData);
     } catch (err) {
@@ -267,7 +244,25 @@ function CalculatorForm({ onGenerate }) {
     } finally {
       setIsLoading(false);
     }
-  }, [macros, allProducts, validate, onGenerate]);
+  }, [macros, allProducts, validate, onGenerate, daysCount]);
+
+  const handleSavePlan = async () => {
+    const actualData = currentMenuData || result;
+    if (!actualData || !actualData.days) return;
+
+    setIsSaving(true);
+    try {
+      await api.post("plans/", {
+        plan_data: actualData,
+      });
+      navigate("/my-plan");
+    } catch (error) {
+      console.error("Помилка при збереженні плану:", error);
+      alert("Не вдалося зберегти раціон. Спробуйте ще раз.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const contentClassName = isProductsOpen
     ? styles.productsContent
@@ -292,108 +287,6 @@ function CalculatorForm({ onGenerate }) {
         <span className={styles.productTitle}>{product.title}</span>
       </label>
     ));
-  };
-
-  const handleShowShoppingList = async () => {
-    if (!result) return;
-
-    setIsShoppingListLoading(true);
-    try {
-      const fridgeRes = await api.get("fridge/");
-      const list = calculateShoppingList(result, fridgeRes.data);
-      setShoppingList(list);
-    } catch (error) {
-      alert("Не вдалося завантажити холодильник. Можливо, ви не авторизовані.");
-    } finally {
-      setIsShoppingListLoading(false);
-    }
-  };
-
-  const handleCookMeal = async () => {
-    if (!result) return;
-
-    if (
-      !window.confirm("Списати використані продукти з вашого холодильника?")
-    ) {
-      return;
-    }
-
-    setIsDeducting(true);
-    try {
-      const fridgeRes = await api.get("fridge/");
-      const currentFridge = fridgeRes.data;
-      const requirements = {};
-
-      ["breakfast", "lunch", "dinner"].forEach((mealType) => {
-        const meal = result[mealType];
-
-        if (meal && meal.items) {
-          meal.items.forEach((dish) => {
-            if (!dish.ingredients || dish.ingredients.length === 0) return;
-
-            const standardDishWeight = dish.ingredients.reduce(
-              (sum, ing) => sum + (ing.weight_g || 0),
-              0,
-            );
-            const targetWeight = dish.grams || standardDishWeight;
-
-            let ratio = 1;
-            if (standardDishWeight > 0 && targetWeight > 0) {
-              ratio = targetWeight / standardDishWeight;
-            }
-
-            dish.ingredients.forEach((ing) => {
-              const id = ing.ingredient_id;
-              if (!requirements[id]) {
-                requirements[id] = {
-                  id: id,
-                  name: ing.ingredient_name,
-                  totalNeeded: 0,
-                };
-              }
-              requirements[id].totalNeeded += (ing.weight_g || 0) * ratio;
-            });
-          });
-        }
-      });
-
-      const operations = [];
-
-      Object.values(requirements).forEach((req) => {
-        const fridgeItem = currentFridge.find(
-          (item) => item.ingredient === req.id,
-        );
-
-        if (fridgeItem) {
-          const remainder = fridgeItem.weight_g - req.totalNeeded;
-
-          if (remainder <= 0) {
-            operations.push(api.delete(`fridge/${fridgeItem.id}/`));
-          } else {
-            operations.push(
-              api.patch(`fridge/${fridgeItem.id}/`, {
-                weight_g: Math.round(remainder),
-              }),
-            );
-          }
-        }
-      });
-
-      if (operations.length > 0) {
-        await Promise.all(operations);
-        alert("✅ Смачного! Продукти успішно списані з холодильника.");
-        setShoppingList(null);
-      } else {
-        alert(
-          "У холодильнику не знайдено жодного продукту з цього раціону для списання.",
-        );
-      }
-    } catch (error) {
-      console.error("Помилка списання:", error);
-      alert("❌ Не вдалося списати продукти.");
-    } finally {
-      setIsDeducting(false);
-    }
   };
 
   return (
@@ -432,6 +325,40 @@ function CalculatorForm({ onGenerate }) {
             onChange={(v) => handleMacroChange("calories", v)}
             error={errors.calories}
           />
+        </div>
+
+        <div className={styles.daysWrapper}>
+          <span className={styles.daysLabel}>Тривалість раціону:</span>
+
+          <div className={styles.customDropdown}>
+            <div
+              className={`${styles.dropdownHeader} ${isDropdownOpen ? styles.dropdownHeaderActive : ""}`}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              {dayOptions.find((opt) => opt.value === daysCount)?.label ||
+                "1 день"}
+              <span
+                className={`${styles.dropdownArrow} ${isDropdownOpen ? styles.dropdownArrowOpen : ""}`}
+              ></span>
+            </div>
+
+            {isDropdownOpen && (
+              <ul className={styles.dropdownList}>
+                {dayOptions.map((option) => (
+                  <li
+                    key={option.value}
+                    className={`${styles.dropdownOption} ${daysCount === option.value ? styles.activeOption : ""}`}
+                    onClick={() => {
+                      setDaysCount(option.value);
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    {option.label}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
 
@@ -508,7 +435,7 @@ function CalculatorForm({ onGenerate }) {
         </div>
       </div>
 
-      <div className={styles.buttonWrapper}>
+      <div className={styles.actionsContainer}>
         <div
           onClick={() => {
             if (!isLoading) handleSubmit();
@@ -522,33 +449,19 @@ function CalculatorForm({ onGenerate }) {
             {isLoading ? "Генерація..." : "Згенерувати раціон"}
           </Button>
         </div>
+
+        {(currentMenuData || result) && (
+          <div onClick={handleSavePlan}>
+            <Button
+              variant="primary"
+              disabled={isSaving}
+              iconBefore={<SaveIcon className={styles.saveIcon} />}
+            >
+              {isSaving ? "Збереження..." : "Зберегти раціон"}
+            </Button>
+          </div>
+        )}
       </div>
-      {result && (
-        <div className={styles.resultSection}>
-          {!shoppingList ? (
-            <div className={styles.shoppingListButtonWrapper}>
-              <div onClick={handleShowShoppingList}>
-                <Button
-                  variant="secondary"
-                  disabled={isShoppingListLoading}
-                  iconBefore={<span>🛒</span>}
-                >
-                  {isShoppingListLoading
-                    ? "Аналізуємо холодильник..."
-                    : "Сформувати список покупок"}
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <ShoppingList
-              list={shoppingList}
-              onClose={() => setShoppingList(null)}
-              onCook={handleCookMeal}
-              isDeducting={isDeducting}
-            />
-          )}
-        </div>
-      )}
     </div>
   );
 }

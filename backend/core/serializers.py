@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Dish, DishIngredient, Ingredient, FridgeItem
+from .models import Dish, DishIngredient, Ingredient, FridgeItem, SavedPlan
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -44,3 +44,23 @@ class FridgeItemSerializer(serializers.ModelSerializer):
         model = FridgeItem
         fields = ['id', 'ingredient', 'ingredient_name', 'weight_g']
         read_only_fields = ['id', 'ingredient_name']
+
+
+class ReplaceDishRequestSerializer(serializers.Serializer):
+    dish_id = serializers.IntegerField()
+    grams = serializers.FloatField()
+    meal_type = serializers.ChoiceField(
+        choices=['breakfast', 'lunch', 'dinner'],
+    )
+    other_dish_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        default=list
+    )
+
+
+class SavedPlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SavedPlan
+        fields = ['id', 'plan_data', 'created_at']
+        read_only_fields = ['id', 'created_at']
