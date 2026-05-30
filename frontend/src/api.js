@@ -29,8 +29,7 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem("nutri_refresh_token");
 
         if (!refreshToken) {
-          localStorage.clear();
-          window.location.href = "/";
+          window.dispatchEvent(new Event("auth-expired"));
           return Promise.reject(error);
         }
 
@@ -49,8 +48,7 @@ api.interceptors.response.use(
           return api(originalRequest);
         }
       } catch (refreshError) {
-        localStorage.clear();
-        window.location.href = "/";
+        window.dispatchEvent(new Event("auth-expired"));
         return Promise.reject(refreshError);
       }
     }
