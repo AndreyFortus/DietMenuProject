@@ -118,15 +118,18 @@ class OptimizeMealAPIView(GenericAPIView):
 
             if meals_data['breakfast'] and 'items' in meals_data['breakfast']:
                 for item in meals_data['breakfast']['items']:
-                    if 'id' in item: used_breakfasts.add(item['id'])
+                    if 'id' in item:
+                        used_breakfasts.add(item['id'])
 
             if meals_data['lunch'] and 'items' in meals_data['lunch']:
                 for item in meals_data['lunch']['items']:
-                    if 'id' in item: used_lunches.add(item['id'])
+                    if 'id' in item:
+                        used_lunches.add(item['id'])
 
             if meals_data['dinner'] and 'items' in meals_data['dinner']:
                 for item in meals_data['dinner']['items']:
-                    if 'id' in item: used_dinners.add(item['id'])
+                    if 'id' in item:
+                        used_dinners.add(item['id'])
 
             day_stats = self._calculate_day_statistics(meals_data)
 
