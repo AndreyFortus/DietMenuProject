@@ -66,5 +66,13 @@ export const calculateShoppingList = (menuData, fridgeItems) => {
     }
   });
 
-  return shoppingList.sort((a, b) => a.name.localeCompare(b.name));
+  return shoppingList.sort((a, b) => {
+    const aFulfilled = a.toBuy === 0;
+    const bFulfilled = b.toBuy === 0;
+
+    if (aFulfilled && !bFulfilled) return 1;
+    if (!aFulfilled && bFulfilled) return -1;
+
+    return a.name.localeCompare(b.name);
+  });
 };

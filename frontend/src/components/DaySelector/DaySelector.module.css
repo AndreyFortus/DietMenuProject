@@ -1,11 +1,13 @@
 .daySelector {
   display: flex;
   gap: 12px;
+  margin-top: 24px;
   margin-bottom: 24px;
   overflow-x: auto;
   padding-bottom: 8px;
   scrollbar-width: none;
 }
+
 .daySelector::-webkit-scrollbar {
   display: none;
 }

@@ -23,14 +23,27 @@ function ShoppingList({ list }) {
             </tr>
           </thead>
           <tbody>
-            {list.map((item, idx) => (
-              <tr key={idx}>
-                <td className={styles.productName}>{item.name}</td>
-                <td>{item.needed} г</td>
-                <td className={styles.haveAmount}>{item.have} г</td>
-                <td className={styles.buyAmount}>{item.toBuy} г</td>
-              </tr>
-            ))}
+            {list.map((item, idx) => {
+              const isFulfilled = item.toBuy === 0;
+
+              return (
+                <tr
+                  key={idx}
+                  className={isFulfilled ? styles.fulfilledRow : ""}
+                >
+                  <td className={styles.productName}>{item.name}</td>
+                  <td>{item.needed} г</td>
+                  <td className={styles.haveAmount}>{item.have} г</td>
+                  <td
+                    className={
+                      isFulfilled ? styles.buyAmountZero : styles.buyAmount
+                    }
+                  >
+                    {item.toBuy} г
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}

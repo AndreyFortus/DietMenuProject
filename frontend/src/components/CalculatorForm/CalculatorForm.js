@@ -9,6 +9,7 @@ import api from "../../api";
 import { ReactComponent as SearchIcon } from "../../assets/search-icon.svg";
 import { ReactComponent as SparkleIcon } from "../../assets/sparkle-icon.svg";
 import { ReactComponent as ChevronUpIcon } from "../../assets/chevron-up.svg";
+import { ReactComponent as SaveIcon } from "../../assets/save-icon.svg";
 
 const BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -49,6 +50,17 @@ function CalculatorForm({ onGenerate, currentMenuData }) {
 
   const [errors, setErrors] = useState({});
   const [loadError, setLoadError] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const dayOptions = [
+    { value: 1, label: "1 день" },
+    { value: 2, label: "2 дні" },
+    { value: 3, label: "3 дні" },
+    { value: 4, label: "4 дні" },
+    { value: 5, label: "5 днів" },
+    { value: 6, label: "6 днів" },
+    { value: 7, label: "1 тиждень" },
+  ];
 
   useEffect(() => {
     const ac = new AbortController();
@@ -200,7 +212,7 @@ function CalculatorForm({ onGenerate, currentMenuData }) {
           description: item.description || "",
           image: item.image || "",
           price: item.cost ? item.cost.toFixed(2) : "0.00",
-          portion: `(~ ${item.cost ? item.cost.toFixed(0) : 0} ₴ порція)`,
+          portion: "",
           weight: item.grams ? item.grams.toFixed(0) : null,
           calories: item.calories ? item.calories.toFixed(0) : "0",
           protein: item.protein ? item.protein.toFixed(0) : "0",
@@ -316,20 +328,37 @@ function CalculatorForm({ onGenerate, currentMenuData }) {
         </div>
 
         <div className={styles.daysWrapper}>
-          <label className={styles.daysLabel}>Тривалість раціону:</label>
-          <select
-            className={styles.daysSelect}
-            value={daysCount}
-            onChange={(e) => setDaysCount(e.target.value)}
-          >
-            <option value="1">1 день</option>
-            <option value="2">2 дні</option>
-            <option value="3">3 дні</option>
-            <option value="4">4 дні</option>
-            <option value="5">5 днів</option>
-            <option value="6">6 днів</option>
-            <option value="7">1 тиждень</option>
-          </select>
+          <span className={styles.daysLabel}>Тривалість раціону:</span>
+
+          <div className={styles.customDropdown}>
+            <div
+              className={`${styles.dropdownHeader} ${isDropdownOpen ? styles.dropdownHeaderActive : ""}`}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              {dayOptions.find((opt) => opt.value === daysCount)?.label ||
+                "1 день"}
+              <span
+                className={`${styles.dropdownArrow} ${isDropdownOpen ? styles.dropdownArrowOpen : ""}`}
+              ></span>
+            </div>
+
+            {isDropdownOpen && (
+              <ul className={styles.dropdownList}>
+                {dayOptions.map((option) => (
+                  <li
+                    key={option.value}
+                    className={`${styles.dropdownOption} ${daysCount === option.value ? styles.activeOption : ""}`}
+                    onClick={() => {
+                      setDaysCount(option.value);
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    {option.label}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
 
@@ -406,7 +435,7 @@ function CalculatorForm({ onGenerate, currentMenuData }) {
         </div>
       </div>
 
-      <div className={styles.buttonWrapper}>
+      <div className={styles.actionsContainer}>
         <div
           onClick={() => {
             if (!isLoading) handleSubmit();
@@ -420,23 +449,19 @@ function CalculatorForm({ onGenerate, currentMenuData }) {
             {isLoading ? "Генерація..." : "Згенерувати раціон"}
           </Button>
         </div>
-      </div>
 
-      {(currentMenuData || result) && (
-        <div className={styles.resultSection}>
-          <div className={styles.shoppingListButtonWrapper}>
-            <div onClick={handleSavePlan}>
-              <Button
-                variant="secondary"
-                disabled={isSaving}
-                iconBefore={<span>💾</span>}
-              >
-                {isSaving ? "Збереження..." : "Зберегти раціон"}
-              </Button>
-            </div>
+        {(currentMenuData || result) && (
+          <div onClick={handleSavePlan}>
+            <Button
+              variant="primary"
+              disabled={isSaving}
+              iconBefore={<SaveIcon className={styles.saveIcon} />}
+            >
+              {isSaving ? "Збереження..." : "Зберегти раціон"}
+            </Button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
