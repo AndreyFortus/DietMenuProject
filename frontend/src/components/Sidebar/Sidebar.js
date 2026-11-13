@@ -5,6 +5,7 @@ import styles from "./Sidebar.module.css";
 
 import { ReactComponent as LogoIcon } from "../../assets/logo-icon.svg";
 import { ReactComponent as RationIcon } from "../../assets/ration-icon.svg";
+import { ReactComponent as NutritionIcon } from "../../assets/nutrition-icon.svg";
 import { ReactComponent as DishesIcon } from "../../assets/dishes-icon.svg";
 import { ReactComponent as ThemeIcon } from "../../assets/theme-icon.svg";
 import { ReactComponent as FridgeIcon } from "../../assets/fridge-icon.svg";
@@ -14,6 +15,7 @@ import { ReactComponent as LogoutIcon } from "../../assets/logout-icon.svg";
 
 const NAV_ITEMS = [
   { to: "/calculator", icon: <RationIcon />, label: "Раціон" },
+  { to: "/nutrition-needs", icon: <NutritionIcon />, label: "Потреби організму" },
   { to: "/my-plan", icon: <PlanIcon />, label: "Мій план" },
   { to: "/fridge", icon: <FridgeIcon />, label: "Холодильник" },
   { to: "/dishes", icon: <DishesIcon />, label: "Страви" },
