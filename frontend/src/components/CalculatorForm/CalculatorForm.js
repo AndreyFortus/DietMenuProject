@@ -48,6 +48,43 @@ function CalculatorForm({ onGenerate, currentMenuData }) {
 
   const [daysCount, setDaysCount] = useState(1);
 
+  useEffect(() => {
+  const savedTargets = localStorage.getItem(
+    'nutriplan-calculator-targets'
+  );
+
+  if (!savedTargets) return;
+
+  try {
+    const targets = JSON.parse(savedTargets);
+
+    const nextValues = {
+      protein: String(targets.protein ?? ''),
+      fat: String(targets.fat ?? ''),
+      carbs: String(targets.carbs ?? ''),
+      calories: String(targets.calories ?? ''),
+    };
+
+    setMacros(nextValues);
+    setUserMacros(nextValues);
+
+    if (targets.days) {
+      setDaysCount(
+        Math.min(7, Math.max(1, Number(targets.days)))
+      );
+    }
+
+    localStorage.removeItem('nutriplan-calculator-targets');
+  } catch (error) {
+    console.error(
+      'Не вдалося прочитати цілі з планувальника:',
+      error
+    );
+
+    localStorage.removeItem('nutriplan-calculator-targets');
+  }
+}, []);
+
   const [errors, setErrors] = useState({});
   const [loadError, setLoadError] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

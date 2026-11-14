@@ -2,6 +2,8 @@ import {
   calculateEnergyModels,
   calculateMacros,
   getModelDifference,
+  buildEnergyPlan,
+  getSensitivityData,
 } from './energyModels';
 
 describe('nutrition energy calculations', () => {
@@ -12,6 +14,7 @@ describe('nutrition energy calculations', () => {
     weight: '60',
     activity: '1.2',
     goal: 'maintain',
+    bodyFat: '',
   };
 
   test('calculates Mifflin–St Jeor resting energy expenditure', () => {
@@ -62,17 +65,48 @@ describe('nutrition energy calculations', () => {
     ).toThrow();
   });
 
-  test('compares the range of model estimates', () => {
+  test('compares model estimates statistically', () => {
     const models = calculateEnergyModels(profile).models;
-    const difference = getModelDifference(models);
+    const statistics = getModelDifference(models);
 
-    expect(difference.max).toBeGreaterThanOrEqual(
-      difference.min
+    expect(statistics.max).toBeGreaterThanOrEqual(statistics.min);
+    expect(statistics.difference).toBe(
+      statistics.max - statistics.min
+    );
+    expect(statistics.standardDeviation).toBeGreaterThanOrEqual(0);
+    expect(statistics.modelDeviations).toHaveLength(3);
+  });
+
+  test('adds Katch–McArdle when body fat percentage is provided', () => {
+    const result = calculateEnergyModels({
+      ...profile,
+      bodyFat: '22',
+    });
+
+    expect(
+      result.models.some((model) => model.id === 'katch')
+    ).toBe(true);
+  });
+  
+  test('does not add Katch–McArdle without body fat percentage', () => {
+    const result = calculateEnergyModels(profile);
+
+    expect(
+      result.models.some((model) => model.id === 'katch')
+    ).toBe(false);
+  });
+
+  test('uses the correct Schofield age group', () => {
+    const result = calculateEnergyModels({
+      ...profile,
+      age: '35',
+    });
+
+    const model = result.models.find(
+      (item) => item.id === 'schofield'
     );
 
-    expect(difference.difference).toBe(
-      difference.max - difference.min
-    );
+    expect(model.ageGroup).toBe('30–59 років');
   });
 
   test('rejects profiles for people under 18', () => {
@@ -83,5 +117,34 @@ describe('nutrition energy calculations', () => {
       })
     ).toThrow();
   });
-});
 
+  test('creates a seven-day energy plan', () => {
+    const result = buildEnergyPlan({
+      baseCalories: 2000,
+      days: 7,
+      mode: 'stable',
+      activityFactors: Array(7).fill(1),
+      distribution: {
+        protein: 20,
+        fat: 30,
+        carbs: 50,
+      },
+    });
+
+    expect(result.rows).toHaveLength(7);
+    expect(result.averageCalories).toBe(2000);
+    expect(result.totalCalories).toBe(14000);
+  });
+
+  test('calculates sensitivity data for body weight', () => {
+    const result = getSensitivityData(
+      profile,
+      'mifflin',
+      'weight'
+    );
+
+    expect(result.length).toBeGreaterThan(0);
+    expect(result[0]).toHaveProperty('x');
+    expect(result[0]).toHaveProperty('y');
+  });
+});

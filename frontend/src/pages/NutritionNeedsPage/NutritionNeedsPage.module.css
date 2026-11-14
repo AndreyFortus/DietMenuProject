@@ -472,3 +472,208 @@
     flex-direction: column;
   }
 }
+
+.metricValue {
+  font-size: 20px !important;
+  overflow-wrap: anywhere;
+}
+
+.analysisTableWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.analysisTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+  color: #344256;
+  font-size: 13px;
+}
+
+.analysisTable th,
+.analysisTable td {
+  padding: 13px 12px;
+  border-bottom: 1px solid #edf0f2;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.analysisTable th {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f8fafc;
+}
+
+.analysisTable tbody tr:hover {
+  background: #fbfefb;
+}
+
+.chartFrame {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid #edf0f2;
+  border-radius: 10px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.chartFrame svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.fieldHint {
+  color: #94a3b8;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.subHeading {
+  margin: 24px 0 14px;
+  color: #344256;
+  font-size: 16px;
+}
+
+.dayFactors {
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fbfcfd;
+}
+
+.dayFactors h3 {
+  margin: 0 0 6px;
+  color: #344256;
+  font-size: 15px;
+}
+
+.dayFactors .formGrid {
+  margin-top: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.planResult {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.planSummary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.planSummary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 17px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.planSummary span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.planSummary strong {
+  color: #388e3c;
+  font-size: 21px;
+}
+
+.planActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.secondaryButton {
+  padding: 13px 20px;
+  border: 1px solid #d8e2d8;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #344256;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondaryButton:hover {
+  border-color: #4caf50;
+  background: #f6fbf6;
+}
+
+.integrationBox {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fbfcfd;
+}
+
+.integrationBox h3 {
+  margin: 0;
+  color: #344256;
+  font-size: 16px;
+}
+
+.integrationRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.integrationRow .field {
+  flex: 1;
+}
+
+@media (max-width: 900px) {
+  .dayFactors .formGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .planSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .dayFactors .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .planActions {
+    flex-direction: column;
+  }
+
+  .planActions button {
+    width: 100%;
+  }
+
+  .integrationRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .integrationRow button {
+    width: 100%;
+  }
+}
+
+@media print {
+  .pageContainer button,
+  .pageContainer form {
+    display: none !important;
+  }
+}

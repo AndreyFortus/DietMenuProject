@@ -4,6 +4,9 @@ import PersonalDataForm from '../../components/NutritionNeeds/PersonalDataForm';
 import ModelComparison from '../../components/NutritionNeeds/ModelComparison';
 import CalculationResults from '../../components/NutritionNeeds/CalculationResults';
 import MacroDistribution from '../../components/NutritionNeeds/MacroDistribution';
+import StatisticalAnalysis from '../../components/NutritionNeeds/StatisticalAnalysis';
+import SensitivityAnalysis from '../../components/NutritionNeeds/SensitivityAnalysis';
+import EnergyPlanBuilder from '../../components/NutritionNeeds/EnergyPlanBuilder';
 
 import {
   calculateEnergyModels,
@@ -15,6 +18,7 @@ import styles from './NutritionNeedsPage.module.css';
 
 function NutritionNeedsPage() {
   const [calculation, setCalculation] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [selectedModelId, setSelectedModelId] = useState('mifflin');
 
   const [distribution, setDistribution] = useState({
@@ -23,10 +27,11 @@ function NutritionNeedsPage() {
     carbs: '50',
   });
 
-  const handleCalculate = (profile) => {
-    const result = calculateEnergyModels(profile);
+  const handleCalculate = (nextProfile) => {
+    const result = calculateEnergyModels(nextProfile);
 
     setCalculation(result);
+    setProfile(nextProfile);
     setSelectedModelId('mifflin');
   };
 
@@ -34,26 +39,15 @@ function NutritionNeedsPage() {
     (model) => model.id === selectedModelId
   );
 
-  const difference = useMemo(() => {
-    if (!calculation) return null;
-
-    return getModelDifference(calculation.models);
-  }, [calculation]);
+  const statistics = useMemo(
+    () => calculation
+      ? getModelDifference(calculation.models)
+      : null,
+    [calculation]
+  );
 
   const macros = useMemo(() => {
     if (!selectedModel) return null;
-
-    const total =
-      Number(distribution.protein) +
-      Number(distribution.fat) +
-      Number(distribution.carbs);
-
-    if (
-      !Number.isFinite(total) ||
-      Math.abs(total - 100) > 0.01
-    ) {
-      return null;
-    }
 
     try {
       return calculateMacros(selectedModel.target, distribution);
@@ -67,14 +61,15 @@ function NutritionNeedsPage() {
       <header className={styles.pageHeader}>
         <h1>Потреби організму</h1>
         <p>
-          Оцініть індивідуальні енергетичні потреби та
-          розрахуйте добову кількість макронутрієнтів.
+          Оцінювання індивідуальних енергетичних потреб,
+          порівняння математичних моделей та планування
+          макронутрієнтів.
         </p>
       </header>
 
       <PersonalDataForm onCalculate={handleCalculate} />
 
-      {calculation && (
+      {calculation && selectedModel && (
         <>
           <ModelComparison
             models={calculation.models}
@@ -84,14 +79,26 @@ function NutritionNeedsPage() {
 
           <CalculationResults
             model={selectedModel}
-            difference={difference}
+            difference={statistics}
+          />
+
+          <StatisticalAnalysis statistics={statistics} />
+
+          <SensitivityAnalysis
+            profile={profile}
+            modelId={selectedModelId}
           />
 
           <MacroDistribution
-            calories={selectedModel.target}
             distribution={distribution}
             onChange={setDistribution}
             macros={macros}
+          />
+
+          <EnergyPlanBuilder
+            baseCalories={selectedModel.target}
+            selectedModel={selectedModel}
+            profile={profile}
           />
 
           <div className={styles.disclaimer}>
@@ -112,8 +119,8 @@ function NutritionNeedsPage() {
           <div className={styles.emptyIcon}>↗</div>
           <h2>Розрахуйте свої добові потреби</h2>
           <p>
-            Заповніть форму вище, щоб побачити результати
-            трьох математичних моделей та порівняти їх.
+            Заповніть форму, щоб порівняти математичні моделі,
+            дослідити вплив параметрів і сформувати персональний план.
           </p>
         </div>
       )}

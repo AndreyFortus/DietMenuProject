@@ -8,6 +8,7 @@ function PersonalDataForm({ onCalculate }) {
     age: '25',
     height: '165',
     weight: '60',
+    bodyFat: '',
     activity: '1.2',
     goal: 'maintain',
   });
@@ -42,8 +43,7 @@ function PersonalDataForm({ onCalculate }) {
         <div>
           <h2>Ваші параметри</h2>
           <p>
-            Вкажіть персональні дані для оцінювання
-            добових енергетичних потреб.
+            Вкажіть персональні дані для оцінювання добових енергетичних потреб.
           </p>
         </div>
       </div>
@@ -104,6 +104,24 @@ function PersonalDataForm({ onCalculate }) {
               onChange={handleChange}
               required
             />
+          </div>
+
+          <div className={styles.field}>
+            <label htmlFor="bodyFat">Жирова маса (%) — необов'язково</label>
+            <input
+              id="bodyFat"
+              name="bodyFat"
+              type="number"
+              min="3"
+              max="60"
+              step="0.1"
+              placeholder="Наприклад, 22"
+              value={form.bodyFat}
+              onChange={handleChange}
+            />
+            <small className={styles.fieldHint}>
+              Потрібно для розрахунку за моделлю Katch–McArdle.
+            </small>
           </div>
 
           <div className={styles.field}>

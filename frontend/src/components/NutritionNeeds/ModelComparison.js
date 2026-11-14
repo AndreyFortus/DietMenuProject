@@ -12,8 +12,7 @@ function ModelComparison({ models, selectedModel, onSelect }) {
         <div>
           <h2>Порівняння математичних моделей</h2>
           <p>
-            Оберіть модель, результат якої буде використано
-            для підсумкового розрахунку.
+            Оберіть модель, результат якої буде використано для підсумкового розрахунку.
           </p>
         </div>
       </div>
@@ -35,7 +34,9 @@ function ModelComparison({ models, selectedModel, onSelect }) {
               <div className={styles.modelTop}>
                 <div>
                   <strong>{model.name}</strong>
-                  <span>Рік публікації: {model.year}</span>
+                  {model.ageGroup && (
+                    <span>Вікова група: {model.ageGroup}</span>
+                  )}
                 </div>
 
                 <div className={styles.modelValue}>
@@ -59,6 +60,10 @@ function ModelComparison({ models, selectedModel, onSelect }) {
                   Підтримання ваги: {model.maintenance} ккал
                 </span>
               </div>
+
+              <span className={styles.helperText}>
+                {model.description}
+              </span>
 
               {isSelected && (
                 <span className={styles.selectedLabel}>
